@@ -1,0 +1,352 @@
+<!DOCTYPE html><html class="theme-next gemini use-motion" lang="zh-Hans"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#222"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"><link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css"><link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.3"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.3"><link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222"><meta name="keywords" content="Hadoop, Hive, Spark, HBase , MySQL, Java, 大数据"><link rel="alternate" href="/atom.xml" title="Changfei's Tech Blog" type="application/atom+xml"><meta name="description" content="Hadoop, Hive, Spark, HBase , MySQL, Java, 大数据, 技术总结"><meta property="og:type" content="website"><meta property="og:title" content="Changfei&#39;s Tech Blog"><meta property="og:url" content="http://www.coderfei.com/page/6/index.html"><meta property="og:site_name" content="Changfei&#39;s Tech Blog"><meta property="og:description" content="Hadoop, Hive, Spark, HBase , MySQL, Java, 大数据, 技术总结"><meta property="og:locale" content="zh-Hans"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Changfei&#39;s Tech Blog"><meta name="twitter:description" content="Hadoop, Hive, Spark, HBase , MySQL, Java, 大数据, 技术总结"><script type="text/javascript" id="hexo.configurations">var NexT=window.NexT||{},CONFIG={root:"/",scheme:"Gemini",version:"5.1.3",sidebar:{position:"left",display:"post",offset:12,b2t:!1,scrollpercent:!1,onmobile:!1},fancybox:!0,tabs:!0,motion:{enable:!0,async:!1,transition:{post_block:"fadeIn",post_header:"slideDownIn",post_body:"slideDownIn",coll_header:"slideLeftIn",sidebar:"slideUpIn"}},duoshuo:{userId:"0",author:"博主"},algolia:{applicationID:"",apiKey:"",indexName:"",hits:{per_page:10},labels:{input_placeholder:"Search for Posts",hits_empty:"We didn't find any results for the search: ${query}",hits_stats:"${hits} results found in ${time} ms"}}}</script><link rel="canonical" href="http://www.coderfei.com/page/6/"><title>Changfei's Tech Blog</title></head><body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans"><div class="container sidebar-position-left page-home"><div class="headband"></div><header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-brand-wrapper"><div class="site-meta"><div class="custom-logo-site-title"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span> <span class="site-title">Changfei's Tech Blog</span><span class="logo-line-after"><i></i></span></a></div><h1 class="site-subtitle" itemprop="description">在纷杂的世界安静的写代码</h1></div><div class="site-nav-toggle"> <button><span class="btn-bar"></span><span class="btn-bar"></span><span class="btn-bar"></span></button></div></div><nav class="site-nav"><ul id="menu" class="menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i><br> 首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i><br> 分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i><br> 归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i><br> 标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i><br> 关于</a></li><li class="menu-item menu-item-search"><a href="javascript:;" class="popup-trigger"><i class="menu-item-icon fa fa-search fa-fw"></i><br> 搜索</a></li></ul><div class="site-search"><div class="popup search-popup local-search-popup"><div class="local-search-header clearfix"><span class="search-icon"><i class="fa fa-search"></i></span><span class="popup-btn-close"><i class="fa fa-times-circle"></i></span><div class="local-search-input-wrapper"> <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input"></div></div><div id="local-search-result"></div></div></div></nav></div></header><main id="main" class="main"><div class="main-inner"><div class="content-wrap"><div id="content" class="content"><section id="posts" class="posts-expand"><article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article"><div class="post-block"><link itemprop="mainEntityOfPage" href="http://www.coderfei.com/2018/01/28/hbase-2-hbase-cluster.html"><span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person"><meta itemprop="name" content="CoderF"><meta itemprop="description" content=""><meta itemprop="image" content="/images/avatar.png"></span><span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization"><meta itemprop="name" content="Changfei's Tech Blog"></span><header class="post-header"><h2 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2018/01/28/hbase-2-hbase-cluster.html" itemprop="url">HBase：2、HBase 部署</a></h2><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-28T22:35:23+08:00">2018-01-28</time></span> <span class="post-category"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/HBase/" itemprop="url" rel="index"><span itemprop="name">HBase</span></a></span></span> <span id="/2018/01/28/hbase-2-hbase-cluster.html" class="leancloud_visitors" data-flag-title="HBase：2、HBase 部署"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-eye"></i></span> <span class="post-meta-item-text">阅读次数&#58;</span><span class="leancloud-visitors-count"></span></span><div class="post-wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span> <span class="post-meta-item-text">字数统计&#58;</span> <span title="字数统计">763</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span> <span class="post-meta-item-text">阅读时长 &asymp;</span> <span title="阅读时长">4</span></div></div></header><div class="post-body" itemprop="articleBody"><h2 id="Zookeeper正常部署"><a href="#Zookeeper正常部署" class="headerlink" title="Zookeeper正常部署"></a>Zookeeper正常部署</h2><p>首先保证Zookeeper集群的正常部署，并启动</p><pre><code>$ bin/zkServer.sh start
+</code></pre><h2 id="Hadoop正常部署"><a href="#Hadoop正常部署" class="headerlink" title="Hadoop正常部署"></a>Hadoop正常部署</h2><p>Hadoop集群的正常部署并启动</p><pre><code>$ sbin/start-dfs.sh
+$ sbin/start-yarn.sh
+</code></pre><h2 id="HBase解压"><a href="#HBase解压" class="headerlink" title="HBase解压"></a>HBase解压</h2><p>解压HBase到指定目录</p><pre><code>$ tar -zxf ~/softwares/installations/hbase-1.2.0-bin.tar.gz -C /opt/software/
+</code></pre><h2 id="HBase配置文件"><a href="#HBase配置文件" class="headerlink" title="HBase配置文件"></a>HBase配置文件</h2><p>hbase-env.sh</p><pre><code>export JAVA_HOME=/usr/java/jdk1.8.0_121
+export HBASE_MANAGES_ZK=false
+</code></pre><p>hbase-site.xml</p><pre><code class="xml">&lt;configuration&gt;
+    &lt;property&gt;     
+        &lt;name&gt;hbase.rootdir&lt;/name&gt;     
+        &lt;value&gt;hdfs://hadoop001:9000/hbase&lt;/value&gt;   
+    &lt;/property&gt;
+
+    &lt;property&gt;   
+        &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;
+        &lt;value&gt;true&lt;/value&gt;
+    &lt;/property&gt;
+
+   &lt;!-- 0.98后的新变动，之前版本没有.port,默认端口为60000 --&gt;
+    &lt;property&gt;
+        &lt;name&gt;hbase.master.port&lt;/name&gt;
+        &lt;value&gt;16000&lt;/value&gt;
+    &lt;/property&gt;
+
+    &lt;property&gt;   
+        &lt;name&gt;hbase.zookeeper.quorum&lt;/name&gt;
+        &lt;value&gt; hadoop001:2181, hadoop002:2181, hadoop003:2181&lt;/value&gt;
+    &lt;/property&gt;
+
+    &lt;property&gt;   
+        &lt;name&gt;hbase.zookeeper.property.dataDir&lt;/name&gt;
+     &lt;value&gt;/opt/software/zookeeper-3.4.5/zkData&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre><p>regionservers</p><pre><code>hadoop001
+hadoop002
+hadoop003
+</code></pre><div class="post-button text-center"> <a class="btn" href="/2018/01/28/hbase-2-hbase-cluster.html#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></div></article><article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article"><div class="post-block"><link itemprop="mainEntityOfPage" href="http://www.coderfei.com/2018/01/27/hbase-1-hbase-summary.html"><span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person"><meta itemprop="name" content="CoderF"><meta itemprop="description" content=""><meta itemprop="image" content="/images/avatar.png"></span><span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization"><meta itemprop="name" content="Changfei's Tech Blog"></span><header class="post-header"><h2 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2018/01/27/hbase-1-hbase-summary.html" itemprop="url">HBase：1、HBase 概述</a></h2><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-27T21:35:23+08:00">2018-01-27</time></span> <span class="post-category"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/HBase/" itemprop="url" rel="index"><span itemprop="name">HBase</span></a></span></span> <span id="/2018/01/27/hbase-1-hbase-summary.html" class="leancloud_visitors" data-flag-title="HBase：1、HBase 概述"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-eye"></i></span> <span class="post-meta-item-text">阅读次数&#58;</span><span class="leancloud-visitors-count"></span></span><div class="post-wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span> <span class="post-meta-item-text">字数统计&#58;</span> <span title="字数统计">863</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span> <span class="post-meta-item-text">阅读时长 &asymp;</span> <span title="阅读时长">3</span></div></div></header><div class="post-body" itemprop="articleBody"><h2 id="HBaes介绍"><a href="#HBaes介绍" class="headerlink" title="HBaes介绍"></a>HBaes介绍</h2><h3 id="HBase的起源"><a href="#HBase的起源" class="headerlink" title="HBase的起源"></a>HBase的起源</h3><p>HBase的原型是Google的BigTable论文，受到了该论文思想的启发，目前作为Hadoop的子项目来开发维护，用于支持结构化的数据存储。</p><p><a href="http://hbase.apache.org" target="_blank" rel="noopener">官方网站</a></p><ul><li><p>2006年Google发表BigTable白皮书。</p></li><li><p>2006年开始开发HBase。</p></li><li><p>2008年北京成功开奥运会，程序员默默地将HBase弄成了Hadoop的子项目。</p></li><li><p>2010年HBase成为Apache顶级项目。</p></li><li><p>现在很多公司二次开发出了很多发行版本，也开始使用了。</p></li></ul><h2 id="HBase的角色"><a href="#HBase的角色" class="headerlink" title="HBase的角色"></a>HBase的角色</h2><h3 id="HMaster"><a href="#HMaster" class="headerlink" title="HMaster"></a>HMaster</h3><p>功能：</p><p>1) 监控RegionServer</p><p>2) 处理RegionServer故障转移</p><p>3) 处理元数据的变更</p><p>4) 处理region的分配或移除</p><p>5) 在空闲时间进行数据的负载均衡</p><p>6) 通过Zookeeper发布自己的位置给客户端</p><h3 id="RegionServer"><a href="#RegionServer" class="headerlink" title="RegionServer"></a>RegionServer</h3><p>功能：</p><p>1) 负责存储HBase的实际数据</p><p>2) 处理分配给它的Region</p><p>3) 刷新缓存到HDFS</p><p>4) 维护HLog</p><p>5) 执行压缩</p><p>6) 负责处理Region分片</p><p>组件：</p><p>1) Write-Ahead logs</p><p>HBase的修改记录，当对HBase读写数据的时候，数据不是直接写进磁盘，它会在内存中保留一段时间（时间以及数据量阈值可以设定）。但把数据保存在内存中可能有更高的概率引起数据丢失，为了解决这个问题，数据会先写在一个叫做Write-Ahead logfile的文件中，然后再写入内存中。所以在系统出现故障的时候，数据可以通过这个日志文件重建。</p><p>2) HFile</p><p>这是在磁盘上保存原始数据的实际的物理文件，是实际的存储文件。</p><p>3) Store</p><p>HFile存储在Store中，一个Store对应HBase表中的一个列族。</p><p>4) MemStore</p><p>顾名思义，就是内存存储，位于内存中，用来保存当前的数据操作，所以当数据保存在WAL中之后，RegsionServer会在内存中存储键值对。</p><p>5) Region</p><p>Hbase表的分片，HBase表会根据RowKey值被切分成不同的region存储在RegionServer中，在一个RegionServer中可以有多个不同的region。</p><h2 id="HBase的架构"><a href="#HBase的架构" class="headerlink" title="HBase的架构"></a>HBase的架构</h2><p>HBase一种是作为存储的分布式文件系统，另一种是作为数据处理模型的MR框架。因为日常开发人员比较熟练的是结构化的数据进行处理，但是在HDFS直接存储的文件往往不具有结构化，所以催生出了HBase在HDFS上的操作。如果需要查询数据，只需要通过键值便可以成功访问。</p><p>架构图如下图所示：</p> <img src="/2018/01/27/hbase-1-hbase-summary/hbase-1.png"><div class="post-button text-center"> <a class="btn" href="/2018/01/27/hbase-1-hbase-summary.html#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></div></article><article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article"><div class="post-block"><link itemprop="mainEntityOfPage" href="http://www.coderfei.com/2018/01/26/kafka-6-kafka-streams.html"><span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person"><meta itemprop="name" content="CoderF"><meta itemprop="description" content=""><meta itemprop="image" content="/images/avatar.png"></span><span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization"><meta itemprop="name" content="Changfei's Tech Blog"></span><header class="post-header"><h2 class="post-title" itemprop="name headline"> <a class="post-title-link" href="/2018/01/26/kafka-6-kafka-streams.html" itemprop="url">Kafka：6、Kafka Streams</a></h2><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-26T20:38:23+08:00">2018-01-26</time></span> <span class="post-category"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a></span></span> <span id="/2018/01/26/kafka-6-kafka-streams.html" class="leancloud_visitors" data-flag-title="Kafka：6、Kafka Streams"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-eye"></i></span> <span class="post-meta-item-text">阅读次数&#58;</span><span class="leancloud-visitors-count"></span></span><div class="post-wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span> <span class="post-meta-item-text">字数统计&#58;</span> <span title="字数统计">1,138</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span> <span class="post-meta-item-text">阅读时长 &asymp;</span> <span title="阅读时长">5</span></div></div></header><div class="post-body" itemprop="articleBody"><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><h3 id="Kafka-Streams"><a href="#Kafka-Streams" class="headerlink" title="Kafka Streams"></a>Kafka Streams</h3><p>Kafka Streams。Apache Kafka开源项目的一个组成部分。是一个功能强大，易于使用的库。用于在Kafka上构建高可分布式、拓展性，容错的应用程序。</p><h3 id="Kafka-Streams特点"><a href="#Kafka-Streams特点" class="headerlink" title="Kafka Streams特点"></a>Kafka Streams特点</h3><p>1）功能强大</p><p>高扩展性，弹性，容错</p><p>2）轻量级</p><p>无需专门的集群</p><p>一个库，而不是框架</p><p>3）完全集成</p><p>100%的Kafka 0.10.0版本兼容</p><p>易于集成到现有的应用程序</p><p>4）实时性</p><p>毫秒级延迟</p><p>并非微批处理</p><p>窗口允许乱序数据</p><p>允许迟到数据</p><h3 id="为什么要有Kafka-Stream"><a href="#为什么要有Kafka-Stream" class="headerlink" title="为什么要有Kafka Stream"></a>为什么要有Kafka Stream</h3><p>当前已经有非常多的流式处理系统，最知名且应用最多的开源流式处理系统有Spark Streaming和Apache Storm。Apache Storm发展多年，应用广泛，提供记录级别的处理能力，当前也支持SQL on Stream。而Spark Streaming基于Apache Spark，可以非常方便与图计算，SQL处理等集成，功能强大，对于熟悉其它Spark应用开发的用户而言使用门槛低。另外，目前主流的Hadoop发行版，如Cloudera和Hortonworks，都集成了Apache Storm和Apache Spark，使得部署更容易。</p><p>既然Apache Spark与Apache Storm拥用如此多的优势，那为何还需要Kafka Stream呢？主要有如下原因。</p><p>第一，Spark和Storm都是流式处理框架，而Kafka Stream提供的是一个基于Kafka的流式处理类库。框架要求开发者按照特定的方式去开发逻辑部分，供框架调用。开发者很难了解框架的具体运行方式，从而使得调试成本高，并且使用受限。而Kafka Stream作为流式处理类库，直接提供具体的类给开发者调用，整个应用的运行方式主要由开发者控制，方便使用和调试。</p> <img src="/2018/01/26/kafka-6-kafka-streams/kafka-1.png"><div class="post-button text-center"> <a class="btn" href="/2018/01/26/kafka-6-kafka-streams.html#more" rel="contents">阅读全文 &raquo;</a></div></div><div></div><footer class="post-footer"><div class="post-eof"></div></footer></div></article></section><nav class="pagination"><a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left"></i></a> <a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/23/">23</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right"></i></a></nav></div></div><div class="sidebar-toggle"><div class="sidebar-toggle-line-wrap"><span class="sidebar-toggle-line sidebar-toggle-line-first"></span><span class="sidebar-toggle-line sidebar-toggle-line-middle"></span><span class="sidebar-toggle-line sidebar-toggle-line-last"></span></div></div><aside id="sidebar" class="sidebar"><div class="sidebar-inner"><section class="site-overview-wrap sidebar-panel sidebar-panel-active"><div class="site-overview"><div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person"> <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="CoderF"><p class="site-author-name" itemprop="name">CoderF</p><p class="site-description motion-element" itemprop="description"></p></div><nav class="site-state motion-element"><div class="site-state-item site-state-posts"> <a href="/archives/"><span class="site-state-item-count">69</span> <span class="site-state-item-name">日志</span></a></div><div class="site-state-item site-state-categories"> <a href="/categories/index.html"><span class="site-state-item-count">12</span> <span class="site-state-item-name">分类</span></a></div><div class="site-state-item site-state-tags"> <a href="/tags/index.html"><span class="site-state-item-count">12</span> <span class="site-state-item-name">标签</span></a></div></nav><div class="feed-link motion-element"><a href="/atom.xml" rel="alternate"><i class="fa fa-rss"></i> RSS</a></div><div class="links-of-author motion-element"><span class="links-of-author-item"><a href="https://www.jianshu.com/u/cf9e217dcf5c" target="_blank" title="简书"><i class="fa fa-fw fa-heartbeat"></i> 简书</a></span><span class="links-of-author-item"><a href="https://github.com/wangchangfei" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i> GitHub</a></span><span class="links-of-author-item"><a href="https://weibo.com/u/5870480318?is_all=1" target="_blank" title="微博"><i class="fa fa-fw fa-weibo"></i> 微博</a></span></div></div></section></div></aside></div></main><footer id="footer" class="footer"><div class="footer-inner"><div class="copyright">&copy; <span itemprop="copyrightYear">2018</span><span class="with-love"><i class="fa fa-user"></i></span> <span class="author" itemprop="copyrightHolder">CoderF</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-area-chart"></i></span> <span class="post-meta-item-text">Site words total count&#58;</span> <span title="Site words total count">91.1k</span></div><link rel="stylesheet" href="//cdn.bootcss.com/highlight.js/9.2.0/styles/solarized-light.min.css"><script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/scala.min.js"></script><script>hljs.initHighlightingOnLoad()</script></div></footer><div class="back-to-top"><i class="fa fa-arrow-up"></i></div></div><script type="text/javascript">"[object Function]"!==Object.prototype.toString.call(window.Promise)&&(window.Promise=null)</script><script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script><script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script><script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script><script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script><script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script><script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script><script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script><script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/npm/valine@1.1.4/dist/Valine.min.js"></script><script type="text/javascript">new Valine({av:AV,el:"#vcomments",verify:!1,notify:!1,app_id:"x8P6mpIr7TWIoaIwTFLtvUjw-gzGzoHsz",app_key:"PkMk480kBPrRXPvH5GF36VpI",placeholder:"说点什么吧！"})</script><script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script><script>AV.initialize("x8P6mpIr7TWIoaIwTFLtvUjw-gzGzoHsz","PkMk480kBPrRXPvH5GF36VpI")</script><script>function showTime(e){var t=new AV.Query(e),c=[],u=$(".leancloud_visitors");u.each(function(){c.push($(this).attr("id").trim())}),t.containedIn("url",c),t.find().done(function(e){var t=".leancloud-visitors-count";if(0!==e.length){for(var n=0;n<e.length;n++){var o=e[n],i=o.get("url"),s=o.get("time"),r=document.getElementById(i);$(r).find(t).text(s)}for(n=0;n<c.length;n++){i=c[n],r=document.getElementById(i);var l=$(r).find(t);""==l.text()&&l.text(0)}}else u.find(t).text(0)}).fail(function(e,t){console.log("Error: "+t.code+" "+t.message)})}function addCount(i){var e=$(".leancloud_visitors"),s=e.attr("id").trim(),r=e.attr("data-flag-title").trim(),t=new AV.Query(i);t.equalTo("url",s),t.find({success:function(e){if(0<e.length){var t=e[0];t.fetchWhenSave(!0),t.increment("time"),t.save(null,{success:function(e){$(document.getElementById(s)).find(".leancloud-visitors-count").text(e.get("time"))},error:function(e,t){console.log("Failed to save Visitor num, with error message: "+t.message)}})}else{var n=new i,o=new AV.ACL;o.setPublicReadAccess(!0),o.setPublicWriteAccess(!0),n.setACL(o),n.set("title",r),n.set("url",s),n.set("time",1),n.save(null,{success:function(e){$(document.getElementById(s)).find(".leancloud-visitors-count").text(e.get("time"))},error:function(e,t){console.log("Failed to create")}})}},error:function(e){console.log("Error:"+e.code+" "+e.message)}})}$(function(){var e=AV.Object.extend("Counter");1==$(".leancloud_visitors").length?addCount(e):1<$(".post-title-link").length&&showTime(e)})</script><script>!function(){var t=document.createElement("script"),e=window.location.protocol.split(":")[0];t.src="https"===e?"https://zz.bdstatic.com/linksubmit/push.js":"http://push.zhanzhang.baidu.com/push.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}()</script></body></html><script type="text/javascript" src="/js/src/love.js"></script>

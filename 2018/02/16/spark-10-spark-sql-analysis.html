@@ -1,0 +1,708 @@
+<!DOCTYPE html><html class="theme-next gemini use-motion" lang="zh-Hans"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#222"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"><link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css"><link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.3"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.3"><link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222"><meta name="keywords" content="Spark,"><link rel="alternate" href="/atom.xml" title="Changfei's Tech Blog" type="application/atom+xml"><meta name="description" content="SparkSession的概念在老的版本中，SparkSQL提供两种SQL查询起始点，一个叫SQLContext，用于Spark自己提供的SQL查询，一个叫HiveContext，用于连接Hive的查询，SparkSession是Spark最新的SQL查询起始点，实质上是SQLContext和HiveContext的组合，所以在SQLContext和HiveContext上可用的API在Spark"><meta name="keywords" content="Spark"><meta property="og:type" content="article"><meta property="og:title" content="Spark：10、Spark SQL 解析"><meta property="og:url" content="http://www.coderfei.com/2018/02/16/spark-10-spark-sql-analysis.html"><meta property="og:site_name" content="Changfei&#39;s Tech Blog"><meta property="og:description" content="SparkSession的概念在老的版本中，SparkSQL提供两种SQL查询起始点，一个叫SQLContext，用于Spark自己提供的SQL查询，一个叫HiveContext，用于连接Hive的查询，SparkSession是Spark最新的SQL查询起始点，实质上是SQLContext和HiveContext的组合，所以在SQLContext和HiveContext上可用的API在Spark"><meta property="og:locale" content="zh-Hans"><meta property="og:updated_time" content="2018-11-20T02:07:46.754Z"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Spark：10、Spark SQL 解析"><meta name="twitter:description" content="SparkSession的概念在老的版本中，SparkSQL提供两种SQL查询起始点，一个叫SQLContext，用于Spark自己提供的SQL查询，一个叫HiveContext，用于连接Hive的查询，SparkSession是Spark最新的SQL查询起始点，实质上是SQLContext和HiveContext的组合，所以在SQLContext和HiveContext上可用的API在Spark"><script type="text/javascript" id="hexo.configurations">var NexT=window.NexT||{},CONFIG={root:"/",scheme:"Gemini",version:"5.1.3",sidebar:{position:"left",display:"post",offset:12,b2t:!1,scrollpercent:!1,onmobile:!1},fancybox:!0,tabs:!0,motion:{enable:!0,async:!1,transition:{post_block:"fadeIn",post_header:"slideDownIn",post_body:"slideDownIn",coll_header:"slideLeftIn",sidebar:"slideUpIn"}},duoshuo:{userId:"0",author:"博主"},algolia:{applicationID:"",apiKey:"",indexName:"",hits:{per_page:10},labels:{input_placeholder:"Search for Posts",hits_empty:"We didn't find any results for the search: ${query}",hits_stats:"${hits} results found in ${time} ms"}}}</script><link rel="canonical" href="http://www.coderfei.com/2018/02/16/spark-10-spark-sql-analysis.html"><title>Spark：10、Spark SQL 解析 | Changfei's Tech Blog</title></head><body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans"><div class="container sidebar-position-left page-post-detail"><div class="headband"></div><header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-brand-wrapper"><div class="site-meta"><div class="custom-logo-site-title"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span> <span class="site-title">Changfei's Tech Blog</span><span class="logo-line-after"><i></i></span></a></div><h1 class="site-subtitle" itemprop="description">在纷杂的世界安静的写代码</h1></div><div class="site-nav-toggle"> <button><span class="btn-bar"></span><span class="btn-bar"></span><span class="btn-bar"></span></button></div></div><nav class="site-nav"><ul id="menu" class="menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i><br> 首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i><br> 分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i><br> 归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i><br> 标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i><br> 关于</a></li><li class="menu-item menu-item-search"><a href="javascript:;" class="popup-trigger"><i class="menu-item-icon fa fa-search fa-fw"></i><br> 搜索</a></li></ul><div class="site-search"><div class="popup search-popup local-search-popup"><div class="local-search-header clearfix"><span class="search-icon"><i class="fa fa-search"></i></span><span class="popup-btn-close"><i class="fa fa-times-circle"></i></span><div class="local-search-input-wrapper"> <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input"></div></div><div id="local-search-result"></div></div></div></nav></div></header><main id="main" class="main"><div class="main-inner"><div class="content-wrap"><div id="content" class="content"><div id="posts" class="posts-expand"><article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article"><div class="post-block"><link itemprop="mainEntityOfPage" href="http://www.coderfei.com/2018/02/16/spark-10-spark-sql-analysis.html"><span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person"><meta itemprop="name" content="CoderF"><meta itemprop="description" content=""><meta itemprop="image" content="/images/avatar.png"></span><span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization"><meta itemprop="name" content="Changfei's Tech Blog"></span><header class="post-header"><h2 class="post-title" itemprop="name headline">Spark：10、Spark SQL 解析</h2><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-16T21:22:23+08:00">2018-02-16</time></span> <span class="post-category"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Spark/" itemprop="url" rel="index"><span itemprop="name">Spark</span></a></span></span> <span id="/2018/02/16/spark-10-spark-sql-analysis.html" class="leancloud_visitors" data-flag-title="Spark：10、Spark SQL 解析"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-eye"></i></span> <span class="post-meta-item-text">阅读次数&#58;</span><span class="leancloud-visitors-count"></span></span><div class="post-wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span> <span class="post-meta-item-text">字数统计&#58;</span> <span title="字数统计">2,574</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span> <span class="post-meta-item-text">阅读时长 &asymp;</span> <span title="阅读时长">13</span></div></div></header><div class="post-body" itemprop="articleBody"><h2 id="SparkSession的概念"><a href="#SparkSession的概念" class="headerlink" title="SparkSession的概念"></a>SparkSession的概念</h2><p>在老的版本中，SparkSQL提供两种SQL查询起始点，一个叫SQLContext，用于Spark自己提供的SQL查询，一个叫HiveContext，用于连接Hive的查询，SparkSession是Spark最新的SQL查询起始点，实质上是SQLContext和HiveContext的组合，所以在SQLContext和HiveContext上可用的API在SparkSession上同样是可以使用的。SparkSession内部封装了sparkContext，所以计算实际上是由sparkContext完成的。</p><pre><code class="scala">import org.apache.spark.sql.SparkSession
+
+val spark = SparkSession
+.builder()
+.appName(&quot;Spark SQL basic example&quot;)
+.config(&quot;spark.some.config.option&quot;, &quot;some-value&quot;)
+.getOrCreate()
+
+// For implicit conversions like converting RDDs to DataFrames
+import spark.implicits._
+</code></pre><p>SparkSession.builder 用于创建一个SparkSession。</p><p>import spark.implicits._的引入是用于将DataFrames隐式转换成RDD，使df能够使用RDD中的方法。</p><p>如果需要Hive支持，则需要以下创建语句：</p><pre><code class="scala">import org.apache.spark.sql.SparkSession
+
+val spark = SparkSession
+.builder()
+.appName(&quot;Spark SQL basic example&quot;)
+.config(&quot;spark.some.config.option&quot;, &quot;some-value&quot;)
+.enableHiveSupport()
+.getOrCreate()
+
+// For implicit conversions like converting RDDs to DataFrames
+import spark.implicits._
+</code></pre><a id="more"></a><h2 id="DataFrames的创建"><a href="#DataFrames的创建" class="headerlink" title="DataFrames的创建"></a>DataFrames的创建</h2><p>在Spark SQL中SparkSession是创建DataFrames和执行SQL的入口，创建DataFrames有三种方式，一种是可以从一个存在的RDD进行转换，还可以从Hive Table进行查询返回，或者通过Spark的数据源进行创建。</p><p>1) 从Spark数据源进行创建：</p><pre><code class="scala">val df = spark.read.json(&quot;examples/src/main/resources/people.json&quot;) 
+// Displays the content of the DataFrame to stdout
+df.show()
+// +----+-------+
+// | age|   name|
+// +----+-------+
+// |null|Michael|
+// |  30|   Andy|
+// |  19| Justin|
+// +----+-------+
+</code></pre><p>2) 将RDD转换为DataFrame：</p><pre><code class="scala">/**
+Michael
+Andy, 30
+Justin, 19
+**/
+scala&gt; val peopleRdd = sc.textFile(&quot;examples/src/main/resources/people.txt&quot;)
+peopleRdd: org.apache.spark.rdd.RDD[String] = examples/src/main/resources/people.txt MapPartitionsRDD[18] at textFile at &lt;console&gt;:24
+
+scala&gt; val peopleDF3 = peopleRdd.map(_.split(&quot;,&quot;)).filter(arr =&gt; arr.length == 2).map(paras =&gt; (paras(0),paras(1).trim().toInt)).toDF(&quot;name&quot;,&quot;age&quot;)
+peopleDF3: org.apache.spark.sql.DataFrame = [name: string, age: int]
+
+scala&gt; peopleDF3.show()
++-------+---+
+|   name|age|
++-------+---+
+|Michael| 29|
+|   Andy| 30|
+| Justin| 19|
++-------+---+
+</code></pre><h2 id="DataFrame的常用操作"><a href="#DataFrame的常用操作" class="headerlink" title="DataFrame的常用操作"></a>DataFrame的常用操作</h2><p>1) DSL风格语法</p><pre><code class="scala">// This import is needed to use the $-notation
+import spark.implicits._
+// Print the schema in a tree format
+df.printSchema()
+// root
+// |-- age: long (nullable = true)
+// |-- name: string (nullable = true)
+
+// Select only the &quot;name&quot; column
+df.select(&quot;name&quot;).show()
+// +-------+
+// |   name|
+// +-------+
+// |Michael|
+// |Andy|
+// | Justin|
+// +-------+
+
+// Select everybody, but increment the age by 1
+df.select($&quot;name&quot;, $&quot;age&quot; + 1).show()
+// +-------+---------+
+// | name|(age + 1)|
+// +-------+---------+
+// |Michael| null|
+// | Andy|   31|
+// | Justin|   20|
+// +-------+---------+
+
+// Select people older than 21
+df.filter($&quot;age&quot; &gt; 21).show()
+// +---+----+
+// |age|name|
+// +---+----+
+// | 30|Andy|
+// +---+----+
+
+// Count people by age
+df.groupBy(&quot;age&quot;).count().show()
+// +----+-----+
+// | age|count|
+// +----+-----+
+// |  19|    1|
+// |null|    1|
+// |  30|    1|
+// +----+-----+
+</code></pre><p>2) SQL风格语法</p><pre><code class="scala">// Register the DataFrame as a SQL temporary view
+df.createOrReplaceTempView(&quot;people&quot;)
+
+val sqlDF = spark.sql(&quot;SELECT * FROM people&quot;)
+sqlDF.show()
+// +----+-------+
+// | age|   name|
+// +----+-------+
+// |null|Michael|
+// |  30|   Andy|
+// |  19| Justin|
+// +----+-------+
+
+
+// Register the DataFrame as a global temporary view
+df.createGlobalTempView(&quot;people&quot;)
+
+// Global temporary view is tied to a system preserved database `global_temp`
+spark.sql(&quot;SELECT * FROM global_temp.people&quot;).show()
+// +----+-------+
+// | age|   name|
+// +----+-------+
+// |null|Michael|
+// |  30|   Andy|
+// |  19| Justin|
+// +----+-------+
+
+// Global temporary view is cross-session
+spark.newSession().sql(&quot;SELECT * FROM global_temp.people&quot;).show()
+// +----+-------+
+// | age|   name|
+// +----+-------+
+// |null|Michael|
+// |  30|   Andy|
+// |  19| Justin|
+// +----+-------+
+</code></pre><p>临时表是Session范围内的，Session退出后，表就失效了。如果想应用范围内有效，可以使用全局表。注意使用全局表时需要全路径访问，如：global_temp.people。</p><h2 id="DataSet的创建"><a href="#DataSet的创建" class="headerlink" title="DataSet的创建"></a>DataSet的创建</h2><p>Dataset是具有强类型的数据集合，需要提供对应的类型信息。</p><pre><code class="scala">// Note: Case classes in Scala 2.10 can support only up to 22 fields. To work around this limit,
+// you can use custom classes that implement the Product interface
+case class Person(name: String, age: Long)
+
+// Encoders are created for case classes
+val caseClassDS = Seq(Person(&quot;Andy&quot;, 32)).toDS()
+caseClassDS.show()
+// +----+---+
+// |name|age|
+// +----+---+
+// |Andy| 32|
+// +----+---+
+
+// Encoders for most common types are automatically provided by importing spark.implicits._
+val primitiveDS = Seq(1, 2, 3).toDS()
+primitiveDS.map(_ + 1).collect() // Returns: Array(2, 3, 4)
+
+// DataFrames can be converted to a Dataset by providing a class. Mapping will be done by name
+val path = &quot;hdfs://hadoop001:9000/people.json&quot;
+val peopleDS = spark.read.json(path).as[Person]
+peopleDS.show()
+// +----+-------+
+// | age|   name|
+// +----+-------+
+// |null|Michael|
+// |  30|   Andy|
+// |  19| Justin|
+// +----+-------+
+</code></pre><h2 id="DataSet与RDD的转换"><a href="#DataSet与RDD的转换" class="headerlink" title="DataSet与RDD的转换"></a>DataSet与RDD的转换</h2><p>Spark SQL支持通过两种方式将存在的RDD转换为Dataset，转换的过程中需要让Dataset获取RDD中的Schema信息，主要有两种方式，一种是通过反射来获取RDD中的Schema信息。这种方式适合于列名已知的情况下。第二种是通过编程接口的方式将Schema信息应用于RDD，这种方式可以处理那种在运行时才能知道列的方式。</p><p>1) 通过反射获取Schema</p><p>SparkSQL能够自动将包含有case类的RDD转换成DataFrame，case类定义了table的结构，case类属性通过反射变成了表的列名。Case类可以包含诸如Seqs或者Array等复杂的结构。</p><pre><code class="scala">// For implicit conversions from RDDs to DataFrames
+import spark.implicits._
+
+// Create an RDD of Person objects from a text file, convert it to a Dataframe
+val peopleDF = val peopleDF = spark.sparkContext.textFile(&quot;hdfs://hadoop001:9000/people2.txt&quot;).map(_.split(&quot;,&quot;)).filter(arr =&gt; arr.length == 2).map(attributes =&gt; Person(attributes(0), attributes(1).trim.toInt)).toDF()
+
+// Register the DataFrame as a temporary view
+peopleDF.createOrReplaceTempView(&quot;people&quot;)
+
+// SQL statements can be run by using the sql methods provided by Spark
+val teenagersDF = spark.sql(&quot;SELECT name, age FROM people WHERE age BETWEEN 13 AND 19&quot;)
+
+// The columns of a row in the result can be accessed by field index  ROW object
+teenagersDF.map(teenager =&gt; &quot;Name: &quot; + teenager(0)).show()
+// +------------+
+// |       value|
+// +------------+
+// |Name: Justin|
+// +------------+
+
+// or by field name
+teenagersDF.map(teenager =&gt; &quot;Name: &quot; + teenager.getAs[String](&quot;name&quot;)).show()
+// +------------+
+// |       value|
+// +------------+
+// |Name: Justin|
+// +------------+
+
+// No pre-defined encoders for Dataset[Map[K,V]], define explicitly
+implicit val mapEncoder = org.apache.spark.sql.Encoders.kryo[Map[String, Any]]
+// Primitive types and case classes can be also defined as
+// implicit val stringIntMapEncoder: Encoder[Map[String, Any]] = ExpressionEncoder()
+
+// row.getValuesMap[T] retrieves multiple columns at once into a Map[String, T]
+teenagersDF.map(teenager =&gt; teenager.getValuesMap[Any](List(&quot;name&quot;, &quot;age&quot;))).collect()
+// Array(Map(&quot;name&quot; -&gt; &quot;Justin&quot;, &quot;age&quot; -&gt; 19))
+</code></pre><p>2) 通过编程设置Schema</p><p>如果case类不能够提前定义，可以通过下面三个步骤定义一个DataFrame</p><p>创建一个多行结构的RDD;</p><p>创建用StructType来表示的行结构信息。</p><p>通过SparkSession提供的createDataFrame方法来应用Schema。</p><pre><code class="scala">import org.apache.spark.sql.types._
+
+// Create an RDD
+val peopleRDD = spark.sparkContext.textFile(&quot;hdfs://hadoop001:9000/people2.txt&quot;)
+
+// The schema is encoded in a string,应该是动态通过程序生成的
+val schemaString = &quot;name age&quot;
+
+// Generate the schema based on the string of schema   Array[StructFiled]
+val fields = schemaString.split(&quot; &quot;).map(fieldName =&gt; StructField(fieldName, StringType, nullable = true))
+
+val filed = schemaString.split(&quot; &quot;).map(filename=&gt; filename match{ case &quot;name&quot; =&gt; StructField(filename,StringType,nullable = true); case &quot;age&quot;=&gt;StructField(filename, IntegerType,nullable = true)})
+
+val schema = StructType(fields)
+
+// Convert records of the RDD (people) to Rows
+import org.apache.spark.sql._
+val rowRDD = peopleRDD.map(_.split(&quot;,&quot;)).filter(arr =&gt; arr.length == 2).map(attributes =&gt; Row(attributes(0), attributes(1).trim))
+// Apply the schema to the RDD
+val peopleDF = spark.createDataFrame(rowRDD, schema)
+
+// Creates a temporary view using the DataFrame
+peopleDF.createOrReplaceTempView(&quot;people&quot;)
+
+// SQL can be run over a temporary view created using DataFrames
+val results = spark.sql(&quot;SELECT name FROM people&quot;)
+
+// The results of SQL queries are DataFrames and support all the normal RDD operations
+// The columns of a row in the result can be accessed by field index or by field name
+results.map(attributes =&gt; &quot;Name: &quot; + attributes(0)).show()
+// +-------------+
+// |        value|
+// +-------------+
+// |Name: Michael|
+// |   Name: Andy|
+// | Name: Justin|
+// +-------------+
+</code></pre><h2 id="类型之间的转换总结"><a href="#类型之间的转换总结" class="headerlink" title="类型之间的转换总结"></a>类型之间的转换总结</h2><p>RDD、DataFrame、Dataset三者有许多共性，有各自适用的场景常常需要在三者之间转换。</p><p>1) DataFrame/Dataset转RDD：</p><pre><code class="scala">val rdd1=testDF.rdd
+val rdd2=testDS.rdd
+</code></pre><p>2) RDD转DataFrame：</p><pre><code class="scala">import spark.implicits._
+val testDF = rdd.map {line=&gt;
+      (line._1,line._2)
+    }.toDF(&quot;col1&quot;,&quot;col2&quot;)
+</code></pre><p>一般用元组把一行的数据写在一起，然后在toDF中指定字段名。</p><p>3) RDD转Dataset：</p><pre><code class="scala">import spark.implicits._
+case class Coltest(col1:String,col2:Int)extends Serializable //定义字段名和类型
+val testDS = rdd.map {line=&gt;
+      Coltest(line._1,line._2)
+    }.toDS
+</code></pre><p>可以注意到，定义每一行的类型（case class）时，已经给出了字段名和类型，后面只要往case class里面添加值即可</p><p>4）Dataset转DataFrame：</p><p>这个也很简单，因为只是把case class封装成Row：</p><pre><code class="scala">import spark.implicits._
+val testDF = testDS.toDF
+DataFrame转Dataset：
+import spark.implicits._
+case class Coltest(col1:String,col2:Int)extends Serializable //定义字段名和类型
+val testDS = testDF.as[Coltest]
+</code></pre><p>这种方法就是在给出每一列的类型后，使用as方法，转成Dataset，这在数据类型是DataFrame又需要针对各个字段处理时极为方便。</p><p>在使用一些特殊的操作时，一定要加上 import spark.implicits._ 不然toDF、toDS无法使用。</p><h2 id="UDF函数"><a href="#UDF函数" class="headerlink" title="UDF函数"></a>UDF函数</h2><p>1) UDF函数的创建</p><pre><code class="scala">scala&gt; val df = spark.read.json(&quot;hdfs://hadoop001:9000/people.json&quot;)
+df: org.apache.spark.sql.DataFrame = [age: bigint, name: string]
+
+scala&gt; df.show()
++----+-------+
+| age|   name|
++----+-------+
+|null|Michael|
+|  30|   Andy|
+|  19| Justin|
++----+-------+
+
+
+scala&gt; spark.udf.register(&quot;addName&quot;, (x:String)=&gt; &quot;Name:&quot;+x)
+res5: org.apache.spark.sql.expressions.UserDefinedFunction = UserDefinedFunction(&lt;function1&gt;,StringType,Some(List(StringType)))
+
+scala&gt; df.createOrReplaceTempView(&quot;people&quot;)
+
+scala&gt; spark.sql(&quot;Select addName(name), age from people&quot;).show()
++-----------------+----+
+|UDF:addName(name)| age|
++-----------------+----+
+|     Name:Michael|null|
+|        Name:Andy|  30|
+|      Name:Justin|  19|
++-----------------+----+
+</code></pre><p>2) UDAF函数的创建</p><p>强类型的Dataset和弱类型的DataFrame都提供了相关的聚合函数， 如 count()，countDistinct()，avg()，max()，min()。除此之外，用户可以设定自己的自定义聚合函数。</p><p>1) 弱类型用户自定义聚合函数</p><p>通过继承UserDefinedAggregateFunction来实现用户自定义聚合函数。下面展示一个求平均工资的自定义聚合函数。</p><pre><code class="scala">import org.apache.spark.sql.expressions.MutableAggregationBuffer
+import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.SparkSession
+
+object MyAverage extends UserDefinedAggregateFunction {
+// 聚合函数输入参数的数据类型 
+def inputSchema: StructType = StructType(StructField(&quot;inputColumn&quot;, LongType) :: Nil)
+// 聚合缓冲区中值得数据类型 
+def bufferSchema: StructType = {
+StructType(StructField(&quot;sum&quot;, LongType) :: StructField(&quot;count&quot;, LongType) :: Nil)
+}
+// 返回值的数据类型 
+def dataType: DataType = DoubleType
+// 对于相同的输入是否一直返回相同的输出。 
+def deterministic: Boolean = true
+// 初始化
+def initialize(buffer: MutableAggregationBuffer): Unit = {
+// 存工资的总额
+buffer(0) = 0L
+// 存工资的个数
+buffer(1) = 0L
+}
+// 相同Execute间的数据合并。 
+def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
+if (!input.isNullAt(0)) {
+buffer(0) = buffer.getLong(0) + input.getLong(0)
+buffer(1) = buffer.getLong(1) + 1
+}
+}
+// 不同Execute间的数据合并 
+def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
+buffer1(0) = buffer1.getLong(0) + buffer2.getLong(0)
+buffer1(1) = buffer1.getLong(1) + buffer2.getLong(1)
+}
+// 计算最终结果
+def evaluate(buffer: Row): Double = buffer.getLong(0).toDouble / buffer.getLong(1)
+}
+
+// 注册函数
+spark.udf.register(&quot;myAverage&quot;, MyAverage)
+
+val df = spark.read.json(&quot;examples/src/main/resources/employees.json&quot;)
+df.createOrReplaceTempView(&quot;employees&quot;)
+df.show()
+// +-------+------+
+// |   name|salary|
+// +-------+------+
+// |Michael|  3000|
+// |   Andy|  4500|
+// | Justin|  3500|
+// |  Berta|  4000|
+// +-------+------+
+
+val result = spark.sql(&quot;SELECT myAverage(salary) as average_salary FROM employees&quot;)
+result.show()
+// +--------------+
+// |average_salary|
+// +--------------+
+// |        3750.0|
+// +--------------+
+</code></pre><p>2) 强类型用户自定义函数</p><p>通过继承Aggregator来实现强类型自定义聚合函数，同样是求平均工资。</p><pre><code class="scala">import org.apache.spark.sql.expressions.Aggregator
+import org.apache.spark.sql.Encoder
+import org.apache.spark.sql.Encoders
+import org.apache.spark.sql.SparkSession
+// 既然是强类型，可能有case类
+case class Employee(name: String, salary: Long)
+case class Average(var sum: Long, var count: Long)
+
+object MyAverage extends Aggregator[Employee, Average, Double] {
+// 定义一个数据结构，保存工资总数和工资总个数，初始都为0
+def zero: Average = Average(0L, 0L)
+// Combine two values to produce a new value. For performance, the function may modify `buffer`
+// and return it instead of constructing a new object
+def reduce(buffer: Average, employee: Employee): Average = {
+buffer.sum += employee.salary
+buffer.count += 1
+buffer
+}
+// 聚合不同execute的结果
+def merge(b1: Average, b2: Average): Average = {
+b1.sum += b2.sum
+b1.count += b2.count
+b1
+}
+// 计算输出
+def finish(reduction: Average): Double = reduction.sum.toDouble / reduction.count
+// 设定之间值类型的编码器，要转换成case类
+// Encoders.product是进行scala元组和case类转换的编码器 
+def bufferEncoder: Encoder[Average] = Encoders.product
+// 设定最终输出值的编码器
+def outputEncoder: Encoder[Double] = Encoders.scalaDouble
+}
+
+import spark.implicits._
+
+val ds = spark.read.json(&quot;examples/src/main/resources/employees.json&quot;).as[Employee]
+ds.show()
+// +-------+------+
+// |   name|salary|
+// +-------+------+
+// |Michael|  3000|
+// |   Andy|  4500|
+// | Justin|  3500|
+// |  Berta|  4000|
+// +-------+------+
+
+// Convert the function to a `TypedColumn` and give it a name
+val averageSalary = MyAverage.toColumn.name(&quot;average_salary&quot;)
+val result = ds.select(averageSalary)
+result.show()
+// +--------------+
+// |average_salary|
+// +--------------+
+// |        3750.0|
+// +--------------+
+</code></pre></div><div><div style="padding:10px 0;margin:20px auto;width:90%;text-align:center"><div>您的支持将鼓励我继续创作！</div> <button id="rewardButton" disable="enable" onclick='var qr=document.getElementById("QR");"none"===qr.style.display?qr.style.display="block":qr.style.display="none"'> <span>打赏</span></button><div id="QR" style="display:none"><div id="wechat" style="display:inline-block"> <img id="wechat_qr" src="/images/wechatpay.png" alt="CoderF 微信支付"><p>微信支付</p></div><div id="alipay" style="display:inline-block"> <img id="alipay_qr" src="/images/alipay.png" alt="CoderF 支付宝"><p>支付宝</p></div></div></div></div><div><div><div style="text-align:center;color:#ccc;font-size:14px">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div></div></div><footer class="post-footer"><div class="post-tags"><a href="/tags/Spark/" rel="tag"><i class="fa fa-tag"></i> Spark</a></div><div class="post-nav"><div class="post-nav-next post-nav-item"><a href="/2018/02/15/spark-9-spark-sql-use.html" rel="next" title="Spark：9、Spark SQL 使用"><i class="fa fa-chevron-left"></i> Spark：9、Spark SQL 使用</a></div><span class="post-nav-divider"></span><div class="post-nav-prev post-nav-item"> <a href="/2018/02/18/spark-11-spark-sql-datasource.html" rel="prev" title="Spark：11、Spark SQL 数据源">Spark：11、Spark SQL 数据源<i class="fa fa-chevron-right"></i></a></div></div></footer></div></article><div class="post-spread"><div class="bdsharebuttonbox"><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a><a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a><a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a><a href="#" class="bds_more" data-cmd="more"></a><a class="bds_count" data-cmd="count"></a></div><script>window._bd_share_config={common:{bdText:"",bdMini:"2",bdMiniList:!1,bdPic:""},share:{bdSize:"16",bdStyle:"0"},image:{viewList:["tsina","douban","sqq","qzone","weixin","twi","fbook"],viewText:"分享到：",viewSize:"16"}}</script><script>with(document)(getElementsByTagName("head")[0]||body).appendChild(createElement("script")).src="/static/api/js/share.js?cdnversion="+~(-new Date/36e5)</script></div></div></div><div class="comments" id="comments"><div id="vcomments"></div></div></div><div class="sidebar-toggle"><div class="sidebar-toggle-line-wrap"><span class="sidebar-toggle-line sidebar-toggle-line-first"></span><span class="sidebar-toggle-line sidebar-toggle-line-middle"></span><span class="sidebar-toggle-line sidebar-toggle-line-last"></span></div></div><aside id="sidebar" class="sidebar"><div class="sidebar-inner"><ul class="sidebar-nav motion-element"><li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap"> 文章目录</li><li class="sidebar-nav-overview" data-target="site-overview-wrap"> 站点概览</li></ul><section class="site-overview-wrap sidebar-panel"><div class="site-overview"><div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person"> <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="CoderF"><p class="site-author-name" itemprop="name">CoderF</p><p class="site-description motion-element" itemprop="description"></p></div><nav class="site-state motion-element"><div class="site-state-item site-state-posts"> <a href="/archives/"><span class="site-state-item-count">69</span> <span class="site-state-item-name">日志</span></a></div><div class="site-state-item site-state-categories"> <a href="/categories/index.html"><span class="site-state-item-count">12</span> <span class="site-state-item-name">分类</span></a></div><div class="site-state-item site-state-tags"> <a href="/tags/index.html"><span class="site-state-item-count">12</span> <span class="site-state-item-name">标签</span></a></div></nav><div class="feed-link motion-element"><a href="/atom.xml" rel="alternate"><i class="fa fa-rss"></i> RSS</a></div><div class="links-of-author motion-element"><span class="links-of-author-item"><a href="https://www.jianshu.com/u/cf9e217dcf5c" target="_blank" title="简书"><i class="fa fa-fw fa-heartbeat"></i> 简书</a></span><span class="links-of-author-item"><a href="https://github.com/wangchangfei" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i> GitHub</a></span><span class="links-of-author-item"><a href="https://weibo.com/u/5870480318?is_all=1" target="_blank" title="微博"><i class="fa fa-fw fa-weibo"></i> 微博</a></span></div></div></section><section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active"><div class="post-toc"><div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#SparkSession的概念"><span class="nav-number">1.</span> <span class="nav-text">SparkSession的概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DataFrames的创建"><span class="nav-number">2.</span> <span class="nav-text">DataFrames的创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DataFrame的常用操作"><span class="nav-number">3.</span> <span class="nav-text">DataFrame的常用操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DataSet的创建"><span class="nav-number">4.</span> <span class="nav-text">DataSet的创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DataSet与RDD的转换"><span class="nav-number">5.</span> <span class="nav-text">DataSet与RDD的转换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类型之间的转换总结"><span class="nav-number">6.</span> <span class="nav-text">类型之间的转换总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UDF函数"><span class="nav-number">7.</span> <span class="nav-text">UDF函数</span></a></li></ol></div></div></section></div></aside></div></main><footer id="footer" class="footer"><div class="footer-inner"><div class="copyright">&copy; <span itemprop="copyrightYear">2018</span><span class="with-love"><i class="fa fa-user"></i></span> <span class="author" itemprop="copyrightHolder">CoderF</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-area-chart"></i></span> <span class="post-meta-item-text">Site words total count&#58;</span> <span title="Site words total count">91.1k</span></div><link rel="stylesheet" href="//cdn.bootcss.com/highlight.js/9.2.0/styles/solarized-light.min.css"><script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/scala.min.js"></script><script>hljs.initHighlightingOnLoad()</script></div></footer><div class="back-to-top"><i class="fa fa-arrow-up"></i></div></div><script type="text/javascript">"[object Function]"!==Object.prototype.toString.call(window.Promise)&&(window.Promise=null)</script><script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script><script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script><script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script><script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script><script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script><script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script><script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script><script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/npm/valine@1.1.4/dist/Valine.min.js"></script><script type="text/javascript">new Valine({av:AV,el:"#vcomments",verify:!1,notify:!1,app_id:"x8P6mpIr7TWIoaIwTFLtvUjw-gzGzoHsz",app_key:"PkMk480kBPrRXPvH5GF36VpI",placeholder:"说点什么吧！"})</script><script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script><script>AV.initialize("x8P6mpIr7TWIoaIwTFLtvUjw-gzGzoHsz","PkMk480kBPrRXPvH5GF36VpI")</script><script>function showTime(e){var t=new AV.Query(e),c=[],u=$(".leancloud_visitors");u.each(function(){c.push($(this).attr("id").trim())}),t.containedIn("url",c),t.find().done(function(e){var t=".leancloud-visitors-count";if(0!==e.length){for(var n=0;n<e.length;n++){var o=e[n],i=o.get("url"),s=o.get("time"),r=document.getElementById(i);$(r).find(t).text(s)}for(n=0;n<c.length;n++){i=c[n],r=document.getElementById(i);var l=$(r).find(t);""==l.text()&&l.text(0)}}else u.find(t).text(0)}).fail(function(e,t){console.log("Error: "+t.code+" "+t.message)})}function addCount(i){var e=$(".leancloud_visitors"),s=e.attr("id").trim(),r=e.attr("data-flag-title").trim(),t=new AV.Query(i);t.equalTo("url",s),t.find({success:function(e){if(0<e.length){var t=e[0];t.fetchWhenSave(!0),t.increment("time"),t.save(null,{success:function(e){$(document.getElementById(s)).find(".leancloud-visitors-count").text(e.get("time"))},error:function(e,t){console.log("Failed to save Visitor num, with error message: "+t.message)}})}else{var n=new i,o=new AV.ACL;o.setPublicReadAccess(!0),o.setPublicWriteAccess(!0),n.setACL(o),n.set("title",r),n.set("url",s),n.set("time",1),n.save(null,{success:function(e){$(document.getElementById(s)).find(".leancloud-visitors-count").text(e.get("time"))},error:function(e,t){console.log("Failed to create")}})}},error:function(e){console.log("Error:"+e.code+" "+e.message)}})}$(function(){var e=AV.Object.extend("Counter");1==$(".leancloud_visitors").length?addCount(e):1<$(".post-title-link").length&&showTime(e)})</script><script>!function(){var t=document.createElement("script"),e=window.location.protocol.split(":")[0];t.src="https"===e?"https://zz.bdstatic.com/linksubmit/push.js":"http://push.zhanzhang.baidu.com/push.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}()</script></body></html><script type="text/javascript" src="/js/src/love.js"></script>

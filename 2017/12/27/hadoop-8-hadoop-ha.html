@@ -1,0 +1,722 @@
+<!DOCTYPE html><html class="theme-next gemini use-motion" lang="zh-Hans"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#222"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"><link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css"><link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.3"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.3"><link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222"><meta name="keywords" content="Hadoop,"><link rel="alternate" href="/atom.xml" title="Changfei's Tech Blog" type="application/atom+xml"><meta name="description" content="准备1、安装jdk/配置ssh/部署好zookeeper集群 2、注意同步所有节点的时间 3、配置主机名与ip映射关系 vi /etc/hosts 192.168.149.141 hadoop001 192.168.149.142 hadoop002 192.168.149.143 hadoop003 hadoop-env.sh配置export JAVA_HOME=/usr/java/jdk"><meta name="keywords" content="Hadoop"><meta property="og:type" content="article"><meta property="og:title" content="Hadoop：8、Hadoop HA"><meta property="og:url" content="http://www.coderfei.com/2017/12/27/hadoop-8-hadoop-ha.html"><meta property="og:site_name" content="Changfei&#39;s Tech Blog"><meta property="og:description" content="准备1、安装jdk/配置ssh/部署好zookeeper集群 2、注意同步所有节点的时间 3、配置主机名与ip映射关系 vi /etc/hosts 192.168.149.141 hadoop001 192.168.149.142 hadoop002 192.168.149.143 hadoop003 hadoop-env.sh配置export JAVA_HOME=/usr/java/jdk"><meta property="og:locale" content="zh-Hans"><meta property="og:updated_time" content="2018-11-20T02:07:46.686Z"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Hadoop：8、Hadoop HA"><meta name="twitter:description" content="准备1、安装jdk/配置ssh/部署好zookeeper集群 2、注意同步所有节点的时间 3、配置主机名与ip映射关系 vi /etc/hosts 192.168.149.141 hadoop001 192.168.149.142 hadoop002 192.168.149.143 hadoop003 hadoop-env.sh配置export JAVA_HOME=/usr/java/jdk"><script type="text/javascript" id="hexo.configurations">var NexT=window.NexT||{},CONFIG={root:"/",scheme:"Gemini",version:"5.1.3",sidebar:{position:"left",display:"post",offset:12,b2t:!1,scrollpercent:!1,onmobile:!1},fancybox:!0,tabs:!0,motion:{enable:!0,async:!1,transition:{post_block:"fadeIn",post_header:"slideDownIn",post_body:"slideDownIn",coll_header:"slideLeftIn",sidebar:"slideUpIn"}},duoshuo:{userId:"0",author:"博主"},algolia:{applicationID:"",apiKey:"",indexName:"",hits:{per_page:10},labels:{input_placeholder:"Search for Posts",hits_empty:"We didn't find any results for the search: ${query}",hits_stats:"${hits} results found in ${time} ms"}}}</script><link rel="canonical" href="http://www.coderfei.com/2017/12/27/hadoop-8-hadoop-ha.html"><title>Hadoop：8、Hadoop HA | Changfei's Tech Blog</title></head><body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans"><div class="container sidebar-position-left page-post-detail"><div class="headband"></div><header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-brand-wrapper"><div class="site-meta"><div class="custom-logo-site-title"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span> <span class="site-title">Changfei's Tech Blog</span><span class="logo-line-after"><i></i></span></a></div><h1 class="site-subtitle" itemprop="description">在纷杂的世界安静的写代码</h1></div><div class="site-nav-toggle"> <button><span class="btn-bar"></span><span class="btn-bar"></span><span class="btn-bar"></span></button></div></div><nav class="site-nav"><ul id="menu" class="menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i><br> 首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i><br> 分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i><br> 归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i><br> 标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i><br> 关于</a></li><li class="menu-item menu-item-search"><a href="javascript:;" class="popup-trigger"><i class="menu-item-icon fa fa-search fa-fw"></i><br> 搜索</a></li></ul><div class="site-search"><div class="popup search-popup local-search-popup"><div class="local-search-header clearfix"><span class="search-icon"><i class="fa fa-search"></i></span><span class="popup-btn-close"><i class="fa fa-times-circle"></i></span><div class="local-search-input-wrapper"> <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input"></div></div><div id="local-search-result"></div></div></div></nav></div></header><main id="main" class="main"><div class="main-inner"><div class="content-wrap"><div id="content" class="content"><div id="posts" class="posts-expand"><article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article"><div class="post-block"><link itemprop="mainEntityOfPage" href="http://www.coderfei.com/2017/12/27/hadoop-8-hadoop-ha.html"><span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person"><meta itemprop="name" content="CoderF"><meta itemprop="description" content=""><meta itemprop="image" content="/images/avatar.png"></span><span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization"><meta itemprop="name" content="Changfei's Tech Blog"></span><header class="post-header"><h2 class="post-title" itemprop="name headline">Hadoop：8、Hadoop HA</h2><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-27T17:22:30+08:00">2017-12-27</time></span> <span class="post-category"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Hadoop/" itemprop="url" rel="index"><span itemprop="name">Hadoop</span></a></span></span> <span id="/2017/12/27/hadoop-8-hadoop-ha.html" class="leancloud_visitors" data-flag-title="Hadoop：8、Hadoop HA"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-eye"></i></span> <span class="post-meta-item-text">阅读次数&#58;</span><span class="leancloud-visitors-count"></span></span><div class="post-wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span> <span class="post-meta-item-text">字数统计&#58;</span> <span title="字数统计">1,852</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span> <span class="post-meta-item-text">阅读时长 &asymp;</span> <span title="阅读时长">10</span></div></div></header><div class="post-body" itemprop="articleBody"><h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>1、安装jdk/配置ssh/部署好zookeeper集群</p><p>2、注意同步所有节点的时间</p><p>3、配置主机名与ip映射关系</p><p>vi /etc/hosts</p><p>192.168.149.141 hadoop001</p><p>192.168.149.142 hadoop002</p><p>192.168.149.143 hadoop003</p><h2 id="hadoop-env-sh配置"><a href="#hadoop-env-sh配置" class="headerlink" title="hadoop-env.sh配置"></a>hadoop-env.sh配置</h2><pre><code>export JAVA_HOME=/usr/java/jdk 
+</code></pre><a id="more"></a><h2 id="core-site-xml配置"><a href="#core-site-xml配置" class="headerlink" title="core-site.xml配置"></a>core-site.xml配置</h2><pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
+&lt;configuration&gt;
+&lt;!--Yarn 需要使用 fs.defaultFS 指定NameNode URI --&gt;
+    &lt;property&gt;
+            &lt;name&gt;fs.defaultFS&lt;/name&gt;
+            &lt;value&gt;hdfs://mycluster&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;!--==============================Trash机制======================================= --&gt;
+    &lt;property&gt;
+            &lt;!--多长时间创建CheckPoint NameNode截点上运行的CheckPointer 从Current文件夹创建CheckPoint;默认：0 由fs.trash.interval项指定 --&gt;
+            &lt;name&gt;fs.trash.checkpoint.interval&lt;/name&gt;
+            &lt;value&gt;0&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+            &lt;!--多少分钟.Trash下的CheckPoint目录会被删除,该配置服务器设置优先级大于客户端，默认：0 不删除 --&gt;
+            &lt;name&gt;fs.trash.interval&lt;/name&gt;
+            &lt;value&gt;1440&lt;/value&gt;
+    &lt;/property&gt;
+
+     &lt;!--指定hadoop临时目录, hadoop.tmp.dir 是hadoop文件系统依赖的基础配置，很多路径都依赖它。如果hdfs-site.xml中不配 置namenode和datanode的存放位置，默认就放在这&gt;个路径中 --&gt;
+    &lt;property&gt;   
+            &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+            &lt;value&gt;/opt/software/hadoop/tmp&lt;/value&gt;
+    &lt;/property&gt;
+
+     &lt;!-- 指定zookeeper地址 --&gt;
+    &lt;property&gt;
+            &lt;name&gt;ha.zookeeper.quorum&lt;/name&gt;
+            &lt;value&gt;hadoop001:2181,hadoop002:2181,hadoop003:2181&lt;/value&gt;
+    &lt;/property&gt;
+     &lt;!--指定ZooKeeper超时间隔，单位毫秒 --&gt;
+    &lt;property&gt;
+            &lt;name&gt;ha.zookeeper.session-timeout.ms&lt;/name&gt;
+            &lt;value&gt;2000&lt;/value&gt;
+    &lt;/property&gt;
+
+    &lt;property&gt;
+       &lt;name&gt;hadoop.proxyuser.root.hosts&lt;/name&gt;
+       &lt;value&gt;*&lt;/value&gt; 
+    &lt;/property&gt; 
+    &lt;property&gt; 
+        &lt;name&gt;hadoop.proxyuser.root.groups&lt;/name&gt; 
+        &lt;value&gt;*&lt;/value&gt; 
+   &lt;/property&gt; 
+
+
+  &lt;property&gt;
+      &lt;name&gt;io.compression.codecs&lt;/name&gt;
+      &lt;value&gt;org.apache.hadoop.io.compress.GzipCodec,
+        org.apache.hadoop.io.compress.DefaultCodec,
+        org.apache.hadoop.io.compress.BZip2Codec,
+        org.apache.hadoop.io.compress.SnappyCodec
+      &lt;/value&gt;
+  &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre><h2 id="hdfs-site-xml配置"><a href="#hdfs-site-xml配置" class="headerlink" title="hdfs-site.xml配置"></a>hdfs-site.xml配置</h2><pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
+&lt;configuration&gt;
+&lt;!--HDFS超级用户 --&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.permissions.superusergroup&lt;/name&gt;
+    &lt;value&gt;root&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;!--开启web hdfs --&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.webhdfs.enabled&lt;/name&gt;
+    &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;
+    &lt;value&gt;/opt/software/hadoop/data/dfs/name&lt;/value&gt;
+    &lt;description&gt; namenode 存放name table(fsimage)本地目录（需要修改）&lt;/description&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.namenode.edits.dir&lt;/name&gt;
+    &lt;value&gt;${dfs.namenode.name.dir}&lt;/value&gt;
+    &lt;description&gt;namenode粗放 transaction file(edits)本地目录（需要修改）&lt;/description&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;
+    &lt;value&gt;/opt/software/hadoop/data/dfs/data&lt;/value&gt;
+    &lt;description&gt;datanode存放block本地目录（需要修改）&lt;/description&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.replication&lt;/name&gt;
+    &lt;value&gt;3&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- 块大小256M （默认128M） --&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.blocksize&lt;/name&gt;
+    &lt;value&gt;268435456&lt;/value&gt;
+&lt;/property&gt;
+&lt;!--======================================================================= --&gt;
+&lt;!--HDFS高可用配置 --&gt;
+&lt;!--指定hdfs的nameservice为mycluster,需要和core-site.xml中的保持一致 --&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.nameservices&lt;/name&gt;
+    &lt;value&gt;mycluster&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;!--设置NameNode IDs 此版本最大只支持两个NameNode --&gt;
+    &lt;name&gt;dfs.ha.namenodes.mycluster&lt;/name&gt;
+    &lt;value&gt;nn1,nn2&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;!-- Hdfs HA: dfs.namenode.rpc-address.[nameservice ID] rpc 通信地址 --&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.namenode.rpc-address.mycluster.nn1&lt;/name&gt;
+    &lt;value&gt;hadoop001:8020&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.namenode.rpc-address.mycluster.nn2&lt;/name&gt;
+    &lt;value&gt;hadoop002:8020&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;!-- Hdfs HA: dfs.namenode.http-address.[nameservice ID] http 通信地址 --&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.namenode.http-address.mycluster.nn1&lt;/name&gt;
+    &lt;value&gt;hadoop001:50070&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.namenode.http-address.mycluster.nn2&lt;/name&gt;
+    &lt;value&gt;hadoop002:50070&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;!--==================Namenode editlog同步 ============================================ --&gt;
+&lt;!--保证数据恢复 --&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.journalnode.http-address&lt;/name&gt;
+    &lt;value&gt;0.0.0.0:8480&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.journalnode.rpc-address&lt;/name&gt;
+    &lt;value&gt;0.0.0.0:8485&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;!--设置JournalNode服务器地址，QuorumJournalManager 用于存储editlog --&gt;
+    &lt;!--格式：qjournal://&lt;host1:port1&gt;;&lt;host2:port2&gt;;&lt;host3:port3&gt;/&lt;journalId&gt; 端口同journalnode.rpc-address --&gt;
+    &lt;name&gt;dfs.namenode.shared.edits.dir&lt;/name&gt;
+    &lt;value&gt;qjournal://hadoop001:8485;hadoop002:8485;hadoop003:8485/mycluster&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+    &lt;!--JournalNode存放数据地址 --&gt;
+    &lt;name&gt;dfs.journalnode.edits.dir&lt;/name&gt;
+    &lt;value&gt;/opt/software/hadoop/data/dfs/jn&lt;/value&gt;
+&lt;/property&gt;
+&lt;!--==================DataNode editlog同步 ============================================ --&gt;
+&lt;property&gt;
+    &lt;!--DataNode,Client连接Namenode识别选择Active NameNode策略 --&gt;
+                         &lt;!-- 配置失败自动切换实现方式 --&gt;
+    &lt;name&gt;dfs.client.failover.proxy.provider.mycluster&lt;/name&gt;
+    &lt;value&gt;org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider&lt;/value&gt;
+&lt;/property&gt;
+&lt;!--==================Namenode fencing：=============================================== --&gt;
+&lt;!--Failover后防止停掉的Namenode启动，造成两个服务 --&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.ha.fencing.methods&lt;/name&gt;
+    &lt;value&gt;sshfence&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.ha.fencing.ssh.private-key-files&lt;/name&gt;
+    &lt;value&gt;/root/.ssh/id_rsa&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;!--多少milliseconds 认为fencing失败 --&gt;
+    &lt;name&gt;dfs.ha.fencing.ssh.connect-timeout&lt;/name&gt;
+    &lt;value&gt;30000&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;!--==================NameNode auto failover base ZKFC and Zookeeper====================== --&gt;
+&lt;!--开启基于Zookeeper  --&gt;
+&lt;property&gt;
+    &lt;name&gt;dfs.ha.automatic-failover.enabled&lt;/name&gt;
+    &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;!--动态许可datanode连接namenode列表 --&gt;
+ &lt;property&gt;
+   &lt;name&gt;dfs.hosts&lt;/name&gt;
+   &lt;value&gt;/opt/software/hadoop/etc/hadoop/slaves&lt;/value&gt;
+ &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre><h2 id="yarn-site-xml配置"><a href="#yarn-site-xml配置" class="headerlink" title="yarn-site.xml配置"></a>yarn-site.xml配置</h2><pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
+&lt;configuration&gt;
+&lt;!-- nodemanager 配置 ================================================= --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;
+    &lt;value&gt;mapreduce_shuffle&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.nodemanager.aux-services.mapreduce.shuffle.class&lt;/name&gt;
+    &lt;value&gt;org.apache.hadoop.mapred.ShuffleHandler&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.nodemanager.localizer.address&lt;/name&gt;
+    &lt;value&gt;0.0.0.0:23344&lt;/value&gt;
+    &lt;description&gt;Address where the localizer IPC is.&lt;/description&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.nodemanager.webapp.address&lt;/name&gt;
+    &lt;value&gt;0.0.0.0:23999&lt;/value&gt;
+    &lt;description&gt;NM Webapp address.&lt;/description&gt;
+&lt;/property&gt;
+
+&lt;!-- HA 配置 =============================================================== --&gt;
+&lt;!-- Resource Manager Configs --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.connect.retry-interval.ms&lt;/name&gt;
+    &lt;value&gt;2000&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.ha.enabled&lt;/name&gt;
+    &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.ha.automatic-failover.enabled&lt;/name&gt;
+    &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- 使嵌入式自动故障转移。HA环境启动，与 ZKRMStateStore 配合 处理fencing --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.ha.automatic-failover.embedded&lt;/name&gt;
+    &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- 集群名称，确保HA选举时对应的集群 --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.cluster-id&lt;/name&gt;
+    &lt;value&gt;yarn-cluster&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.ha.rm-ids&lt;/name&gt;
+    &lt;value&gt;rm1,rm2&lt;/value&gt;
+&lt;/property&gt;
+
+
+&lt;!--这里RM主备结点需要单独指定,（可选）
+&lt;property&gt;
+     &lt;name&gt;yarn.resourcemanager.ha.id&lt;/name&gt;
+     &lt;value&gt;rm2&lt;/value&gt;
+ &lt;/property&gt;
+ --&gt;
+
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.scheduler.class&lt;/name&gt;
+    &lt;value&gt;org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.recovery.enabled&lt;/name&gt;
+    &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.app.mapreduce.am.scheduler.connection.wait.interval-ms&lt;/name&gt;
+    &lt;value&gt;5000&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- ZKRMStateStore 配置 --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.store.class&lt;/name&gt;
+    &lt;value&gt;org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.zk-address&lt;/name&gt;
+    &lt;value&gt;hadoop001:2181,hadoop002:2181,hadoop003:2181&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.zk.state-store.address&lt;/name&gt;
+    &lt;value&gt;hadoop001:2181,hadoop002:2181,hadoop003:2181&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- Client访问RM的RPC地址 (applications manager interface) --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.address.rm1&lt;/name&gt;
+    &lt;value&gt;hadoop001:23140&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.address.rm2&lt;/name&gt;
+    &lt;value&gt;hadoop002:23140&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- AM访问RM的RPC地址(scheduler interface) --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.scheduler.address.rm1&lt;/name&gt;
+    &lt;value&gt;hadoop001:23130&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.scheduler.address.rm2&lt;/name&gt;
+    &lt;value&gt;hadoop002:23130&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- RM admin interface --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.admin.address.rm1&lt;/name&gt;
+    &lt;value&gt;hadoop001:23141&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.admin.address.rm2&lt;/name&gt;
+    &lt;value&gt;hadoop002:23141&lt;/value&gt;
+&lt;/property&gt;
+&lt;!--NM访问RM的RPC端口 --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.resource-tracker.address.rm1&lt;/name&gt;
+    &lt;value&gt;hadoop001:23125&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.resource-tracker.address.rm2&lt;/name&gt;
+    &lt;value&gt;hadoop002:23125&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- RM web application 地址 --&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.webapp.address.rm1&lt;/name&gt;
+    &lt;value&gt;hadoop001:8088&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.webapp.address.rm2&lt;/name&gt;
+    &lt;value&gt;hadoop002:8088&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.webapp.https.address.rm1&lt;/name&gt;
+    &lt;value&gt;hadoop001:23189&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.resourcemanager.webapp.https.address.rm2&lt;/name&gt;
+    &lt;value&gt;hadoop002:23189&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+   &lt;name&gt;yarn.log-aggregation-enable&lt;/name&gt;
+   &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+     &lt;name&gt;yarn.log.server.url&lt;/name&gt;
+     &lt;value&gt;http://hadoop001:19888/jobhistory/logs&lt;/value&gt;
+&lt;/property&gt;
+
+
+&lt;property&gt;
+    &lt;name&gt;yarn.nodemanager.resource.memory-mb&lt;/name&gt;
+    &lt;value&gt;2048&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;yarn.scheduler.minimum-allocation-mb&lt;/name&gt;
+    &lt;value&gt;1024&lt;/value&gt;
+    &lt;discription&gt;单个任务可申请最少内存，默认1024MB&lt;/discription&gt;
+ &lt;/property&gt;
+
+
+  &lt;property&gt;
+&lt;name&gt;yarn.scheduler.maximum-allocation-mb&lt;/name&gt;
+&lt;value&gt;2048&lt;/value&gt;
+&lt;discription&gt;单个任务可申请最大内存，默认8192MB&lt;/discription&gt;
+  &lt;/property&gt;
+
+   &lt;property&gt;
+   &lt;name&gt;yarn.nodemanager.resource.cpu-vcores&lt;/name&gt;
+   &lt;value&gt;2&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;/configuration&gt;
+</code></pre><h2 id="mapred-site-xml配置"><a href="#mapred-site-xml配置" class="headerlink" title="mapred-site.xml配置"></a>mapred-site.xml配置</h2><pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;configuration.xsl&quot;?&gt;
+&lt;configuration&gt;
+&lt;!-- 配置 MapReduce Applications --&gt;
+&lt;property&gt;
+    &lt;name&gt;mapreduce.framework.name&lt;/name&gt;
+    &lt;value&gt;yarn&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- JobHistory Server ============================================================== --&gt;
+&lt;!-- 配置 MapReduce JobHistory Server 地址 ，默认端口10020 --&gt;
+&lt;property&gt;
+    &lt;name&gt;mapreduce.jobhistory.address&lt;/name&gt;
+    &lt;value&gt;hadoop001:10020&lt;/value&gt;
+&lt;/property&gt;
+&lt;!-- 配置 MapReduce JobHistory Server web ui 地址， 默认端口19888 --&gt;
+&lt;property&gt;
+    &lt;name&gt;mapreduce.jobhistory.webapp.address&lt;/name&gt;
+    &lt;value&gt;hadoop001:19888&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;!-- 配置 Map段输出的压缩,snappy--&gt;
+  &lt;property&gt;
+  &lt;name&gt;mapreduce.map.output.compress&lt;/name&gt; 
+  &lt;value&gt;true&lt;/value&gt;
+  &lt;/property&gt;
+
+  &lt;property&gt;
+  &lt;name&gt;mapreduce.map.output.compress.codec&lt;/name&gt; 
+  &lt;value&gt;org.apache.hadoop.io.compress.SnappyCodec&lt;/value&gt;
+   &lt;/property&gt;
+
+&lt;/configuration&gt;
+</code></pre><h2 id="slaves配置"><a href="#slaves配置" class="headerlink" title="slaves配置"></a>slaves配置</h2><pre><code>hadoop001
+hadoop002
+hadoop003
+</code></pre><h2 id="分发到其他机器"><a href="#分发到其他机器" class="headerlink" title="分发到其他机器"></a>分发到其他机器</h2><pre><code>scp -r /home/hadoop/apps/hadoop root@hadoop002:/home/hadoop/apps
+scp -r /home/hadoop/apps/hadoop root@hadoop003:/home/hadoop/apps
+</code></pre><h2 id="启动zookeeper（hadoop001、hadoop002、hadoop003）"><a href="#启动zookeeper（hadoop001、hadoop002、hadoop003）" class="headerlink" title="启动zookeeper（hadoop001、hadoop002、hadoop003）"></a>启动zookeeper（hadoop001、hadoop002、hadoop003）</h2><pre><code>zkServer.sh start
+</code></pre><h2 id="启动JournalNode-部署了JN的节点"><a href="#启动JournalNode-部署了JN的节点" class="headerlink" title="启动JournalNode(部署了JN的节点)"></a>启动JournalNode(部署了JN的节点)</h2><pre><code>hadoop-daemon.sh start journalnode
+</code></pre><h2 id="格式化HDFS"><a href="#格式化HDFS" class="headerlink" title="格式化HDFS"></a>格式化HDFS</h2><pre><code>cd /home/hadoop/apps/hadoop
+mkdir data/
+cd data/
+hdfs namenode -format(格式化命令)
+cd ../
+scp -r data/ root@hadoop002:/home/hadoop/apps/hadoop
+scp -r data/ root@hadoop003:/home/hadoop/apps/hadoop
+</code></pre><h2 id="在zookeeper的主节点leader上格式化zookeeper集群"><a href="#在zookeeper的主节点leader上格式化zookeeper集群" class="headerlink" title="在zookeeper的主节点leader上格式化zookeeper集群"></a>在zookeeper的主节点leader上格式化zookeeper集群</h2><pre><code>hdfs zkfc -formatZK
+</code></pre><h2 id="启动hadoop集群"><a href="#启动hadoop集群" class="headerlink" title="启动hadoop集群"></a>启动hadoop集群</h2><pre><code>start-all.sh
+</code></pre><h2 id="热备的RM要单独启动，故这一步在hadoop002上执行"><a href="#热备的RM要单独启动，故这一步在hadoop002上执行" class="headerlink" title="热备的RM要单独启动，故这一步在hadoop002上执行"></a>热备的RM要单独启动，故这一步在hadoop002上执行</h2><pre><code>yarn-daemon.sh start resourcemanager
+</code></pre></div><div><div style="padding:10px 0;margin:20px auto;width:90%;text-align:center"><div>您的支持将鼓励我继续创作！</div> <button id="rewardButton" disable="enable" onclick='var qr=document.getElementById("QR");"none"===qr.style.display?qr.style.display="block":qr.style.display="none"'> <span>打赏</span></button><div id="QR" style="display:none"><div id="wechat" style="display:inline-block"> <img id="wechat_qr" src="/images/wechatpay.png" alt="CoderF 微信支付"><p>微信支付</p></div><div id="alipay" style="display:inline-block"> <img id="alipay_qr" src="/images/alipay.png" alt="CoderF 支付宝"><p>支付宝</p></div></div></div></div><div><div><div style="text-align:center;color:#ccc;font-size:14px">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div></div></div><footer class="post-footer"><div class="post-tags"><a href="/tags/Hadoop/" rel="tag"><i class="fa fa-tag"></i> Hadoop</a></div><div class="post-nav"><div class="post-nav-next post-nav-item"><a href="/2017/12/26/hadoop-7-hadoop-yarn-detail.html" rel="next" title="Hadoop：7、YARN的内存和CPU配置"><i class="fa fa-chevron-left"></i> Hadoop：7、YARN的内存和CPU配置</a></div><span class="post-nav-divider"></span><div class="post-nav-prev post-nav-item"> <a href="/2017/12/28/hadoop-9-hadoop-compress.html" rel="prev" title="Hadoop：9、Hadoop 压缩详解">Hadoop：9、Hadoop 压缩详解<i class="fa fa-chevron-right"></i></a></div></div></footer></div></article><div class="post-spread"><div class="bdsharebuttonbox"><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a><a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a><a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a><a href="#" class="bds_more" data-cmd="more"></a><a class="bds_count" data-cmd="count"></a></div><script>window._bd_share_config={common:{bdText:"",bdMini:"2",bdMiniList:!1,bdPic:""},share:{bdSize:"16",bdStyle:"0"},image:{viewList:["tsina","douban","sqq","qzone","weixin","twi","fbook"],viewText:"分享到：",viewSize:"16"}}</script><script>with(document)(getElementsByTagName("head")[0]||body).appendChild(createElement("script")).src="/static/api/js/share.js?cdnversion="+~(-new Date/36e5)</script></div></div></div><div class="comments" id="comments"><div id="vcomments"></div></div></div><div class="sidebar-toggle"><div class="sidebar-toggle-line-wrap"><span class="sidebar-toggle-line sidebar-toggle-line-first"></span><span class="sidebar-toggle-line sidebar-toggle-line-middle"></span><span class="sidebar-toggle-line sidebar-toggle-line-last"></span></div></div><aside id="sidebar" class="sidebar"><div class="sidebar-inner"><ul class="sidebar-nav motion-element"><li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap"> 文章目录</li><li class="sidebar-nav-overview" data-target="site-overview-wrap"> 站点概览</li></ul><section class="site-overview-wrap sidebar-panel"><div class="site-overview"><div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person"> <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="CoderF"><p class="site-author-name" itemprop="name">CoderF</p><p class="site-description motion-element" itemprop="description"></p></div><nav class="site-state motion-element"><div class="site-state-item site-state-posts"> <a href="/archives/"><span class="site-state-item-count">69</span> <span class="site-state-item-name">日志</span></a></div><div class="site-state-item site-state-categories"> <a href="/categories/index.html"><span class="site-state-item-count">12</span> <span class="site-state-item-name">分类</span></a></div><div class="site-state-item site-state-tags"> <a href="/tags/index.html"><span class="site-state-item-count">12</span> <span class="site-state-item-name">标签</span></a></div></nav><div class="feed-link motion-element"><a href="/atom.xml" rel="alternate"><i class="fa fa-rss"></i> RSS</a></div><div class="links-of-author motion-element"><span class="links-of-author-item"><a href="https://www.jianshu.com/u/cf9e217dcf5c" target="_blank" title="简书"><i class="fa fa-fw fa-heartbeat"></i> 简书</a></span><span class="links-of-author-item"><a href="https://github.com/wangchangfei" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i> GitHub</a></span><span class="links-of-author-item"><a href="https://weibo.com/u/5870480318?is_all=1" target="_blank" title="微博"><i class="fa fa-fw fa-weibo"></i> 微博</a></span></div></div></section><section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active"><div class="post-toc"><div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备"><span class="nav-number">1.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hadoop-env-sh配置"><span class="nav-number">2.</span> <span class="nav-text">hadoop-env.sh配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#core-site-xml配置"><span class="nav-number">3.</span> <span class="nav-text">core-site.xml配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hdfs-site-xml配置"><span class="nav-number">4.</span> <span class="nav-text">hdfs-site.xml配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#yarn-site-xml配置"><span class="nav-number">5.</span> <span class="nav-text">yarn-site.xml配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mapred-site-xml配置"><span class="nav-number">6.</span> <span class="nav-text">mapred-site.xml配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#slaves配置"><span class="nav-number">7.</span> <span class="nav-text">slaves配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分发到其他机器"><span class="nav-number">8.</span> <span class="nav-text">分发到其他机器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动zookeeper（hadoop001、hadoop002、hadoop003）"><span class="nav-number">9.</span> <span class="nav-text">启动zookeeper（hadoop001、hadoop002、hadoop003）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动JournalNode-部署了JN的节点"><span class="nav-number">10.</span> <span class="nav-text">启动JournalNode(部署了JN的节点)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#格式化HDFS"><span class="nav-number">11.</span> <span class="nav-text">格式化HDFS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在zookeeper的主节点leader上格式化zookeeper集群"><span class="nav-number">12.</span> <span class="nav-text">在zookeeper的主节点leader上格式化zookeeper集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动hadoop集群"><span class="nav-number">13.</span> <span class="nav-text">启动hadoop集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#热备的RM要单独启动，故这一步在hadoop002上执行"><span class="nav-number">14.</span> <span class="nav-text">热备的RM要单独启动，故这一步在hadoop002上执行</span></a></li></ol></div></div></section></div></aside></div></main><footer id="footer" class="footer"><div class="footer-inner"><div class="copyright">&copy; <span itemprop="copyrightYear">2018</span><span class="with-love"><i class="fa fa-user"></i></span> <span class="author" itemprop="copyrightHolder">CoderF</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-area-chart"></i></span> <span class="post-meta-item-text">Site words total count&#58;</span> <span title="Site words total count">91.1k</span></div><link rel="stylesheet" href="//cdn.bootcss.com/highlight.js/9.2.0/styles/solarized-light.min.css"><script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/scala.min.js"></script><script>hljs.initHighlightingOnLoad()</script></div></footer><div class="back-to-top"><i class="fa fa-arrow-up"></i></div></div><script type="text/javascript">"[object Function]"!==Object.prototype.toString.call(window.Promise)&&(window.Promise=null)</script><script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script><script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script><script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script><script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script><script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script><script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script><script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script><script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/npm/valine@1.1.4/dist/Valine.min.js"></script><script type="text/javascript">new Valine({av:AV,el:"#vcomments",verify:!1,notify:!1,app_id:"x8P6mpIr7TWIoaIwTFLtvUjw-gzGzoHsz",app_key:"PkMk480kBPrRXPvH5GF36VpI",placeholder:"说点什么吧！"})</script><script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script><script>AV.initialize("x8P6mpIr7TWIoaIwTFLtvUjw-gzGzoHsz","PkMk480kBPrRXPvH5GF36VpI")</script><script>function showTime(e){var t=new AV.Query(e),c=[],u=$(".leancloud_visitors");u.each(function(){c.push($(this).attr("id").trim())}),t.containedIn("url",c),t.find().done(function(e){var t=".leancloud-visitors-count";if(0!==e.length){for(var n=0;n<e.length;n++){var o=e[n],i=o.get("url"),s=o.get("time"),r=document.getElementById(i);$(r).find(t).text(s)}for(n=0;n<c.length;n++){i=c[n],r=document.getElementById(i);var l=$(r).find(t);""==l.text()&&l.text(0)}}else u.find(t).text(0)}).fail(function(e,t){console.log("Error: "+t.code+" "+t.message)})}function addCount(i){var e=$(".leancloud_visitors"),s=e.attr("id").trim(),r=e.attr("data-flag-title").trim(),t=new AV.Query(i);t.equalTo("url",s),t.find({success:function(e){if(0<e.length){var t=e[0];t.fetchWhenSave(!0),t.increment("time"),t.save(null,{success:function(e){$(document.getElementById(s)).find(".leancloud-visitors-count").text(e.get("time"))},error:function(e,t){console.log("Failed to save Visitor num, with error message: "+t.message)}})}else{var n=new i,o=new AV.ACL;o.setPublicReadAccess(!0),o.setPublicWriteAccess(!0),n.setACL(o),n.set("title",r),n.set("url",s),n.set("time",1),n.save(null,{success:function(e){$(document.getElementById(s)).find(".leancloud-visitors-count").text(e.get("time"))},error:function(e,t){console.log("Failed to create")}})}},error:function(e){console.log("Error:"+e.code+" "+e.message)}})}$(function(){var e=AV.Object.extend("Counter");1==$(".leancloud_visitors").length?addCount(e):1<$(".post-title-link").length&&showTime(e)})</script><script>!function(){var t=document.createElement("script"),e=window.location.protocol.split(":")[0];t.src="https"===e?"https://zz.bdstatic.com/linksubmit/push.js":"http://push.zhanzhang.baidu.com/push.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}()</script></body></html><script type="text/javascript" src="/js/src/love.js"></script>

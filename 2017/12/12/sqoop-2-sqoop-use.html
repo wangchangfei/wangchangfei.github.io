@@ -1,0 +1,710 @@
+<!DOCTYPE html><html class="theme-next gemini use-motion" lang="zh-Hans"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#222"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"><link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css"><link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.3"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.3"><link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222"><meta name="keywords" content="Sqoop,"><link rel="alternate" href="/atom.xml" title="Changfei's Tech Blog" type="application/atom+xml"><meta name="description" content="sqoop介绍Apache Sqoop是专为ApacheHadoop和结构化数据存储如关系数据库之间的数据转换工具的有效工具。你可以使用Sqoop从外部结构化数据存储的数据导入到Hadoop分布式文件系统或相关系统如Hive和HBase。相反，Sqoop可以用来从Hadoop的数据提取和导出到外部结构化数据存储如关系数据库和企业数据仓库。Sqoop专为大数据批量传输设计，能够分割数据集并创建Had"><meta name="keywords" content="Sqoop"><meta property="og:type" content="article"><meta property="og:title" content="Sqoop：2、Sqoop使用"><meta property="og:url" content="http://www.coderfei.com/2017/12/12/sqoop-2-sqoop-use.html"><meta property="og:site_name" content="Changfei&#39;s Tech Blog"><meta property="og:description" content="sqoop介绍Apache Sqoop是专为ApacheHadoop和结构化数据存储如关系数据库之间的数据转换工具的有效工具。你可以使用Sqoop从外部结构化数据存储的数据导入到Hadoop分布式文件系统或相关系统如Hive和HBase。相反，Sqoop可以用来从Hadoop的数据提取和导出到外部结构化数据存储如关系数据库和企业数据仓库。Sqoop专为大数据批量传输设计，能够分割数据集并创建Had"><meta property="og:locale" content="zh-Hans"><meta property="og:updated_time" content="2018-11-20T02:07:46.810Z"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Sqoop：2、Sqoop使用"><meta name="twitter:description" content="sqoop介绍Apache Sqoop是专为ApacheHadoop和结构化数据存储如关系数据库之间的数据转换工具的有效工具。你可以使用Sqoop从外部结构化数据存储的数据导入到Hadoop分布式文件系统或相关系统如Hive和HBase。相反，Sqoop可以用来从Hadoop的数据提取和导出到外部结构化数据存储如关系数据库和企业数据仓库。Sqoop专为大数据批量传输设计，能够分割数据集并创建Had"><script type="text/javascript" id="hexo.configurations">var NexT=window.NexT||{},CONFIG={root:"/",scheme:"Gemini",version:"5.1.3",sidebar:{position:"left",display:"post",offset:12,b2t:!1,scrollpercent:!1,onmobile:!1},fancybox:!0,tabs:!0,motion:{enable:!0,async:!1,transition:{post_block:"fadeIn",post_header:"slideDownIn",post_body:"slideDownIn",coll_header:"slideLeftIn",sidebar:"slideUpIn"}},duoshuo:{userId:"0",author:"博主"},algolia:{applicationID:"",apiKey:"",indexName:"",hits:{per_page:10},labels:{input_placeholder:"Search for Posts",hits_empty:"We didn't find any results for the search: ${query}",hits_stats:"${hits} results found in ${time} ms"}}}</script><link rel="canonical" href="http://www.coderfei.com/2017/12/12/sqoop-2-sqoop-use.html"><title>Sqoop：2、Sqoop使用 | Changfei's Tech Blog</title></head><body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans"><div class="container sidebar-position-left page-post-detail"><div class="headband"></div><header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader"><div class="header-inner"><div class="site-brand-wrapper"><div class="site-meta"><div class="custom-logo-site-title"><a href="/" class="brand" rel="start"><span class="logo-line-before"><i></i></span> <span class="site-title">Changfei's Tech Blog</span><span class="logo-line-after"><i></i></span></a></div><h1 class="site-subtitle" itemprop="description">在纷杂的世界安静的写代码</h1></div><div class="site-nav-toggle"> <button><span class="btn-bar"></span><span class="btn-bar"></span><span class="btn-bar"></span></button></div></div><nav class="site-nav"><ul id="menu" class="menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i><br> 首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i><br> 分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i><br> 归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i><br> 标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i><br> 关于</a></li><li class="menu-item menu-item-search"><a href="javascript:;" class="popup-trigger"><i class="menu-item-icon fa fa-search fa-fw"></i><br> 搜索</a></li></ul><div class="site-search"><div class="popup search-popup local-search-popup"><div class="local-search-header clearfix"><span class="search-icon"><i class="fa fa-search"></i></span><span class="popup-btn-close"><i class="fa fa-times-circle"></i></span><div class="local-search-input-wrapper"> <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input"></div></div><div id="local-search-result"></div></div></div></nav></div></header><main id="main" class="main"><div class="main-inner"><div class="content-wrap"><div id="content" class="content"><div id="posts" class="posts-expand"><article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article"><div class="post-block"><link itemprop="mainEntityOfPage" href="http://www.coderfei.com/2017/12/12/sqoop-2-sqoop-use.html"><span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person"><meta itemprop="name" content="CoderF"><meta itemprop="description" content=""><meta itemprop="image" content="/images/avatar.png"></span><span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization"><meta itemprop="name" content="Changfei's Tech Blog"></span><header class="post-header"><h2 class="post-title" itemprop="name headline">Sqoop：2、Sqoop使用</h2><div class="post-meta"><span class="post-time"><span class="post-meta-item-icon"><i class="fa fa-calendar-o"></i></span> <span class="post-meta-item-text">发表于</span> <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-12T08:35:18+08:00">2017-12-12</time></span> <span class="post-category"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-folder-o"></i></span> <span class="post-meta-item-text">分类于</span> <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Sqoop/" itemprop="url" rel="index"><span itemprop="name">Sqoop</span></a></span></span> <span id="/2017/12/12/sqoop-2-sqoop-use.html" class="leancloud_visitors" data-flag-title="Sqoop：2、Sqoop使用"><span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-eye"></i></span> <span class="post-meta-item-text">阅读次数&#58;</span><span class="leancloud-visitors-count"></span></span><div class="post-wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span> <span class="post-meta-item-text">字数统计&#58;</span> <span title="字数统计">3,805</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span> <span class="post-meta-item-text">阅读时长 &asymp;</span> <span title="阅读时长">20</span></div></div></header><div class="post-body" itemprop="articleBody"><h2 id="sqoop介绍"><a href="#sqoop介绍" class="headerlink" title="sqoop介绍"></a>sqoop介绍</h2><p>Apache Sqoop是专为ApacheHadoop和结构化数据存储如关系数据库之间的数据转换工具的有效工具。你可以使用Sqoop从外部结构化数据存储的数据导入到Hadoop分布式文件系统或相关系统如Hive和HBase。相反，Sqoop可以用来从Hadoop的数据提取和导出到外部结构化数据存储如关系数据库和企业数据仓库。<br>Sqoop专为大数据批量传输设计，能够分割数据集并创建Hadoop任务来处理每个区块。<br>sqoop的安装和下载可参考该地址</p><h2 id="查看帮助命令sqoop-help"><a href="#查看帮助命令sqoop-help" class="headerlink" title="查看帮助命令sqoop help"></a>查看帮助命令sqoop help</h2><pre><code>[root@hadoop lib]$ sqoop help
+usage: sqoop COMMAND [ARGS]
+
+Available commands:
+  codegen            Generate code to interact with database records
+  create-hive-table  Import a table definition into Hive
+  eval               Evaluate a SQL statement and display the results
+  export             Export an HDFS directory to a database table
+  help               List available commands
+  import             Import a table from a database to HDFS
+  import-all-tables  Import tables from a database to HDFS
+  import-mainframe   Import datasets from a mainframe server to HDFS
+  job                Work with saved jobs
+  list-databases     List available databases on a server
+  list-tables        List available tables in a database
+  merge              Merge results of incremental imports
+  metastore          Run a standalone Sqoop metastore
+  version            Display version information
+
+See &#39;sqoop help COMMAND&#39; for information on a specific command.
+</code></pre><p>这里提示我们使用sqoop help command（要查询的命令）进行该命令的详细查询</p><h2 id="list-databases"><a href="#list-databases" class="headerlink" title="list-databases"></a>list-databases</h2><pre><code>[root@hadoop001 lib]$ sqoop help list-databases]
+</code></pre><p>–connect jdbc:mysql://hostname:port/database指定mysql数据库主机名和端口号和数据库名(默认端口号为3306)</p><p>–username : root 指定数据库用户名</p><p>–password :123456 指定数据库密码</p><pre><code>[root@hadoop001 lib]$ sqoop list-databases \
+&gt; --connect jdbc:mysql://localhost:3306 \
+&gt; --username root \
+&gt; --password 123456
+
+information_schema
+basic01
+mysql
+performance_schema
+sqoop
+test
+</code></pre><a id="more"></a><h2 id="list-tables"><a href="#list-tables" class="headerlink" title="list-tables"></a>list-tables</h2><pre><code>[root@hadoop001 lib]$ sqoop list-tables \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root \
+&gt; --password 123456
+
+stu
+emp
+</code></pre><h2 id="将mysql导入HDFS中-import"><a href="#将mysql导入HDFS中-import" class="headerlink" title="将mysql导入HDFS中(import)"></a>将mysql导入HDFS中(import)</h2><p>默认导入当前用户目录下/user/用户名/表名</p><p>说到这里扩展一个小知识点：hdfs dfs -ls和hdfs dfs -ls \的区别。</p><pre><code>sqoop import --connect jdbc:mysql://localhost/database --username root --password 123456 --table example –m 1
+</code></pre><p>–table : example mysql中即将导出的表</p><p>-m 1：指定启动一个map进程，如果表很大，可以启动多个map进程，默认是4个</p><p><code>这里可能会出现两个错误，如下：</code></p><p>第一个错误</p><pre><code>18/01/14 16:01:19 ERROR tool.ImportTool: Error during import: No primary key could be found for table stu. Please specify one with --split-by or perform a sequential import with &#39;-m 1&#39;
+</code></pre><p>提示可以看出，在我们从mysql中导出的表没有设定主键，提示我们使用把<code>--split-by</code>或者把参数<code>-m</code>设置为1，这里大家会不会问到，这是为什么呢？</p><p>1、Sqoop通可以过–split-by指定切分的字段，–m设置mapper的数量。通过这两个参数分解生成m个where子句，进行分段查询。</p><p>2、split-by 根据不同的参数类型有不同的切分方法，如表共有100条数据其中id为int类型，并且我们指定–split-by id，我们不设置map数量使用默认的为四个，首先Sqoop会取获取切分字段的MIN()和MAX()即（–split-by），再根据map数量进行划分，这是字段值就会分为四个map：（1-25）（26-50）（51-75）（75-100）。</p><p>3、根据MIN和MAX不同的类型采用不同的切分方式支持有Date,Text,Float,Integer， Boolean,NText,BigDecimal等等。</p><p>4、所以，若导入的表中没有主键，将-m设置称1或者设置split-by，即只有一个map运行，缺点是不能并行map录入数据。（注意，当-m 设置的值大于1时，split-by必须设置字段） 。</p><p>5、split-by即便是int型，若不是连续有规律递增的话，各个map分配的数据是不均衡的，可能会有些map很忙，有些map几乎没有数据处理的情况。</p><p>第二个错误</p><pre><code>Exception in thread &quot;main&quot; java.lang.NoClassDefFoundError: org/json/JSONObject
+        at org.apache.sqoop.util.SqoopJsonUtil.getJsonStringforMap(SqoopJsonUtil.java:42)
+        at org.apache.sqoop.SqoopOptions.writeProperties(SqoopOptions.java:742)
+        at org.apache.sqoop.mapreduce.JobBase.putSqoopOptionsToConfiguration(JobBase.java:369)
+        at org.apache.sqoop.mapreduce.JobBase.createJob(JobBase.java:355)
+        at org.apache.sqoop.mapreduce.ImportJobBase.runImport(ImportJobBase.java:249)
+        at org.apache.sqoop.manager.SqlManager.importTable(SqlManager.java:692)
+        at org.apache.sqoop.manager.MySQLManager.importTable(MySQLManager.java:118)
+        at org.apache.sqoop.tool.ImportTool.importTable(ImportTool.java:497)
+        at org.apache.sqoop.tool.ImportTool.run(ImportTool.java:605)
+        at org.apache.sqoop.Sqoop.run(Sqoop.java:143)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.sqoop.Sqoop.runSqoop(Sqoop.java:179)
+        at org.apache.sqoop.Sqoop.runTool(Sqoop.java:218)
+        at org.apache.sqoop.Sqoop.runTool(Sqoop.java:227)
+        at org.apache.sqoop.Sqoop.main(Sqoop.java:236)
+Caused by: java.lang.ClassNotFoundException: org.json.JSONObject
+        at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+        at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+        ... 15 more
+</code></pre><p>这里我们需要导入java-json.jar包，<a href="http://www.java2s.com/Code/Jar/j/Downloadjavajsonjar.htm" target="_blank" rel="noopener">下载地址</a>，把java-json.jar添加到../sqoop/lib目录</p><pre><code>[root@hadoop001 lib]$ sqoop import --connect jdbc:mysql://localhost:3306/sqoop --username root --password 123456 --table stu
+
+
+[root@hadoop001 lib]$ hdfs dfs -ls /user/hadoop/stu
+Found 4 items
+-rw-r--r--   1 hadoop supergroup          0 2018-01-14 17:07 /user/hadoop/stu/_SUCCESS
+-rw-r--r--   1 hadoop supergroup         11 2018-01-14 17:07 /user/hadoop/stu/part-m-00000
+-rw-r--r--   1 hadoop supergroup          7 2018-01-14 17:07 /user/hadoop/stu/part-m-00001
+-rw-r--r--   1 hadoop supergroup          9 2018-01-14 17:07 /user/hadoop/stu/part-m-00002
+[root@hadoop001 lib]$ hdfs dfs -cat /user/hadoop/stu/&quot;part*&quot;
+1,zhangsan
+2,lisi
+3,wangwu
+</code></pre><p>加上参数m</p><pre><code>[root@hadoop001 lib]$ sqoop import --connect jdbc:mysql://localhost:3306/sqoop --username root --password 123456 --table stu -m 1
+</code></pre><p>这里大家可能也会出现一个错误，在hdfs上已经存，错误如下：</p><pre><code>18/01/14 17:52:47 ERROR tool.ImportTool: Encountered IOException running import job: org.apache.hadoop.mapred.FileAlreadyExistsException: Output directory hdfs://192.168.137.200:9000/user/hadoop/stu already exists
+        at org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.checkOutputSpecs(FileOutputFormat.java:146)
+        at org.apache.hadoop.mapreduce.JobSubmitter.checkSpecs(JobSubmitter.java:270)
+        at org.apache.hadoop.mapreduce.JobSubmitter.submitJobInternal(JobSubmitter.java:143)
+        at org.apache.hadoop.mapreduce.Job$10.run(Job.java:1307)
+        at org.apache.hadoop.mapreduce.Job$10.run(Job.java:1304)
+        at java.security.AccessController.doPrivileged(Native Method)
+        at javax.security.auth.Subject.doAs(Subject.java:422)
+        at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1693)
+        at org.apache.hadoop.mapreduce.Job.submit(Job.java:1304)
+        at org.apache.hadoop.mapreduce.Job.waitForCompletion(Job.java:1325)
+        at org.apache.sqoop.mapreduce.ImportJobBase.doSubmitJob(ImportJobBase.java:196)
+        at org.apache.sqoop.mapreduce.ImportJobBase.runJob(ImportJobBase.java:169)
+        at org.apache.sqoop.mapreduce.ImportJobBase.runImport(ImportJobBase.java:266)
+        at org.apache.sqoop.manager.SqlManager.importTable(SqlManager.java:692)
+        at org.apache.sqoop.manager.MySQLManager.importTable(MySQLManager.java:118)
+        at org.apache.sqoop.tool.ImportTool.importTable(ImportTool.java:497)
+        at org.apache.sqoop.tool.ImportTool.run(ImportTool.java:605)
+        at org.apache.sqoop.Sqoop.run(Sqoop.java:143)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.sqoop.Sqoop.runSqoop(Sqoop.java:179)
+        at org.apache.sqoop.Sqoop.runTool(Sqoop.java:218)
+        at org.apache.sqoop.Sqoop.runTool(Sqoop.java:227)
+        at org.apache.sqoop.Sqoop.main(Sqoop.java:236)
+</code></pre><p>删除目标目录后在导入,并且指定mapreduce的job的名字</p><p>参数：–delete-target-dir –mapreduce-job-name</p><pre><code>[root@hadoop001 lib]$ sqoop import \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root --password 123456 \
+&gt; --mapreduce-job-name FromMySQL2HDFS \
+&gt; --delete-target-dir \
+&gt; --table stu \
+&gt; -m 1
+</code></pre><p>导入到指定目录</p><p>参数：–target-dir /directory</p><pre><code>[root@hadoop001 lib]$ sqoop import --connect jdbc:mysql://localhost:3306/sqoop --username root -password 123456 --table stu -m 1 --target-dir /sqoop/
+
+
+[root@hadoop001 lib]$ hdfs dfs -ls /sqoop
+Found 2 items
+-rw-r--r--   1 hadoop supergroup          0 2018-01-14 18:07 /sqoop/_SUCCESS
+-rw-r--r--   1 hadoop supergroup         27 2018-01-14 18:07 /sqoop/part-m-00000
+[root@hadoop001 lib]$ hdfs dfs -cat /sqoop/part-m-00000
+1,zhangsan
+2,lisi
+3,wangwu
+</code></pre><p>指定字段之间的分隔符</p><p>参数：–fields-terminated-by</p><pre><code>[root@hadoop001 lib]$ sqoop import \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root --password 123456 \
+&gt; --table stu \
+&gt; --mapreduce-job-name FromMySQL2HDFS \
+&gt; --delete-target-dir \
+&gt; --fields-terminated-by &#39;\t&#39; \
+&gt; -m 1 
+
+
+[root@hadoop001 lib]$ hdfs dfs -ls /user/hadoop/stu/ 
+Found 2 items
+-rw-r--r--   1 hadoop supergroup          0 2018-01-14 19:47 /user/hadoop/stu/_SUCCESS
+-rw-r--r--   1 hadoop supergroup         27 2018-01-14 19:47 /user/hadoop/stu/part-m-0000 
+
+[root@hadoop001 lib]$ hdfs dfs -cat /user/hadoop/stu/part-m-00000   
+1       zhangsan
+2       lisi
+3       wangwu
+（字段之间变为空格）
+</code></pre><p>如果表中的字段为null转化为0</p><p>参数：–null-non-string</p><ol><li><p>–null-string含义是 string类型的字段，当Value是NULL，替换成指定的字符</p></li><li><p>–null-non-string 含义是非string类型的字段，当Value是NULL，替换成指定字符先</p></li></ol><p>导入薪资表</p><pre><code>[root@hadoop001 lib]$ sqoop import \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root --password 123456 \
+&gt; --table sal \
+&gt; --mapreduce-job-name FromMySQL2HDFS \
+&gt; --delete-target-dir \
+&gt; --fields-terminated-by &#39;\t&#39; \
+&gt; -m 1
+
+
+[root@hadoop001 lib]$  hdfs dfs -cat /user/hadoop/sal/part-m-00000
+zhangsan        1000
+lisi    2000
+wangwu  null
+</code></pre><p>加上参数`–null-string</p><pre><code>[root@hadoop001 lib]$ sqoop import \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root --password 123456 \
+&gt; --table sal \
+&gt; --mapreduce-job-name FromMySQL2HDFS \
+&gt; --delete-target-dir \
+&gt; --fields-terminated-by &#39;\t&#39; \
+&gt; -m 1 \
+&gt; --null-string 0
+
+
+[root@hadoop001 lib]$  hdfs dfs -cat /user/hadoop/sal/part-m-00000
+zhangsan        1000
+lisi    2000
+wangwu  0
+</code></pre><p>导入表中的部分字段</p><p>参数：–columns</p><pre><code>[root@hadoop001 ~]$ sqoop import \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root --password 123456 \
+&gt; --table stu \
+&gt; --mapreduce-job-name FromMySQL2HDFS \
+&gt; --delete-target-dir \
+&gt; --fields-terminated-by &#39;\t&#39; \
+&gt; -m 1 \
+&gt; --null-string 0 \
+&gt; --columns &quot;name&quot; 
+
+
+[root@hadoop001 ~]$ hdfs dfs -cat /user/hadoop/stu/part-m-00000
+zhangsan
+lisi
+wangwu
+</code></pre><p>按条件导入数据</p><p>参数：–where</p><pre><code>[root@hadoop001 ~]$ sqoop import \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root --password 123456 \
+&gt; --table stu \
+&gt; --mapreduce-job-name FromMySQL2HDFS \
+&gt; --delete-target-dir \
+&gt; --fields-terminated-by &#39;\t&#39; \
+&gt; -m 1 \
+&gt; --null-string 0 \
+&gt; --columns &quot;name&quot; \
+&gt; --target-dir STU_COLUMN_WHERE \
+&gt; --where &#39;id&lt;3&#39;
+
+
+zhangsan
+lisi
+</code></pre><p>按照sql语句进行导入</p><p>参数：–query</p><p>使用–query关键字，就不能使用–table和–columns</p><p>自定义sql语句的where条件中必须包含字符串 $CONDITIONS，$CONDITIONS是一个变量，用于给多个map任务划分任务范 围；</p><pre><code>sqoop import \
+--connect jdbc:mysql://localhost:3306/sqoop \
+--username root --password 123456 \
+--mapreduce-job-name FromMySQL2HDFS \
+--delete-target-dir \
+--fields-terminated-by &#39;\t&#39; \
+-m 1 \
+--null-string 0 \
+--target-dir STU_COLUMN_QUERY \
+--query &quot;select * from stu where id&gt;1 and \$CONDITIONS&quot;
+
+（或者quer使用这种格式：--query &#39;select * from emp where id&gt;1 and $CONDITIONS&#39;）                                           
+
+
+2       lisi
+3       wangwu
+</code></pre><h2 id="在文件中执行"><a href="#在文件中执行" class="headerlink" title="在文件中执行"></a>在文件中执行</h2><p>创建文件sqoop-import-hdfs.txt</p><pre><code>[root@hadoop001 data]$ vi sqoop-import-hdfs.txt                                   
+import
+--connect
+jdbc:mysql://localhost:3306/sqoop
+--username
+root
+--password
+123456
+--table
+stu
+--target-dir 
+STU_option_file
+</code></pre><p>执行</p><pre><code>[root@hadoop001 data]$ sqoop --option-file /home/hadoop/data/sqoop-import-hdfs.txt
+
+[root@hadoop001 data]$ hdfs dfs -cat STU_option_file/&quot;part*&quot;
+1,zhangsan
+2,lisi
+3,wangwu
+</code></pre><h2 id="eval"><a href="#eval" class="headerlink" title="eval"></a>eval</h2><p>查看帮助命令对与该命令的解释为： Evaluate a SQL statement and display the results，也就是说执行一个SQL语句并查询出结果。</p><pre><code>[root@hadoop001 data]$ sqoop eval \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root --password 123456 \
+&gt; --query &quot;select * from stu&quot; 
+Warning: /opt/software/sqoop/../hbase does not exist! HBase imports will fail.
+Please set $HBASE_HOME to the root of your HBase installation.
+Warning: /opt/software/sqoop/../hcatalog does not exist! HCatalog jobs will fail.
+Please set $HCAT_HOME to the root of your HCatalog installation.
+Warning: /opt/software/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+Warning: /opt/software/sqoop/../zookeeper does not exist! Accumulo imports will fail.
+Please set $ZOOKEEPER_HOME to the root of your Zookeeper installation.
+18/01/14 21:35:25 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.7.0
+18/01/14 21:35:25 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+18/01/14 21:35:26 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+--------------------------------------
+| id          | name                 | 
+--------------------------------------
+| 1           | zhangsan             | 
+| 2           | lisi                 | 
+| 3           | wangwu               | 
+--------------------------------------
+</code></pre><h2 id="HDFS数据导出到MySQL（Hive中的数据导入到MySQL）"><a href="#HDFS数据导出到MySQL（Hive中的数据导入到MySQL）" class="headerlink" title="HDFS数据导出到MySQL（Hive中的数据导入到MySQL）"></a>HDFS数据导出到MySQL（Hive中的数据导入到MySQL）</h2><p>导出HDFS上的sal数据，查询数据：</p><pre><code>[root@hadoop001 data]$ hdfs dfs -cat sal/part-m-00000
+zhangsan        1000
+lisi    2000
+wangwu  0
+</code></pre><p>在执行导出语句前先创建sal_demo表（不创建表会报错）</p><pre><code>mysql&gt; create table sal_demo like sal;
+</code></pre><p>导出语句</p><pre><code>[root@hadoop001 data]$ sqoop export \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root \
+&gt; --password 123456 \
+&gt; --table sal_demo \
+&gt; --input-fields-terminated-by &#39;\t&#39;\
+&gt; --export-dir /user/hadoop/sal/
+</code></pre><p>–table sal_demo ：指定导出表的名称；</p><p>–input-fields-terminated-by：可以用来指定hdfs上文件的分隔符，默认是逗号（查询数据室可以看出我是用的是\t，所以这里指定为\t ，这里大家小心可能因为分隔符的原因报错）</p><p>–export-dir ：导出数据的目录。</p><p>结果</p><pre><code>mysql&gt; select * from sal_demo;
++----------+--------+
+| name     | salary |
++----------+--------+
+| zhangsan | 1000   |
+| lisi     | 2000   |
+| wangwu   | 0      |
++----------+--------+
+3 rows in set (0.00 sec)
+</code></pre><p>(如果再导入一次会追加在表中)</p><p>插入中文乱码问题</p><pre><code>sqoop export --connect &quot;jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf-8&quot; --username root --password 123456 --table sal -m 1 --export-dir /user/hadoop/sal/
+</code></pre><p>指定导出的字段</p><pre><code>--columns &lt;col,col,col...&gt;
+[root@hadoop001 data]$ sqoop export \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root \
+&gt; --password 123456 \
+&gt; --table sal_demo3 \
+&gt; --input-fields-terminated-by &#39;\t&#39; \
+&gt; --export-dir /user/hadoop/sal/ \
+&gt; --columns name
+</code></pre><p>查询结果</p><pre><code>mysql&gt; select * from sal_demo3  
+    -&gt; ;
++----------+--------+
+| name     | salary |
++----------+--------+
+| zhangsan | NULL   |
+| lisi     | NULL   |
+| wangwu   | NULL   |
++----------+--------+
+3 rows in set (0.00 sec)
+</code></pre><h2 id="MySQL的中的数据导入到Hive中"><a href="#MySQL的中的数据导入到Hive中" class="headerlink" title="MySQL的中的数据导入到Hive中"></a>MySQL的中的数据导入到Hive中</h2><pre><code>[root@hadoop001 ~]$ sqoop import \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root --password 123456 \
+&gt; --table stu \
+&gt; --create-hive-table \
+&gt; --hive-database hive \
+&gt; --hive-import \
+&gt; --hive-overwrite \
+&gt; --hive-table stu_import \
+&gt; --mapreduce-job-name FromMySQL2HDFS \
+&gt; --delete-target-dir \
+&gt; --fields-terminated-by &#39;\t&#39; \
+&gt; -m 1 \
+&gt; --null-non-string 0
+</code></pre><p>–create-hive-table ：创建目标表，如果有会报错；</p><p>–hive-database：指定hive数据库；</p><p>–hive-import ：指定导入hive（没有这个条件导入到hdfs中）；</p><p>–hive-overwrite ：覆盖；</p><p>–hive-table stu_import :指定hive中表的名字，如果不指定使用导入的表的表名。</p><p>这里可能会报错，错误如下：</p><pre><code>18/01/15 01:29:28 ERROR hive.HiveConfig: Could not load org.apache.hadoop.hive.conf.HiveConf. Make sure HIVE_CONF_DIR is set correctly.
+18/01/15 01:29:28 ERROR tool.ImportTool: Encountered IOException running import job: java.io.IOException: java.lang.ClassNotFoundException: org.apache.hadoop.hive.conf.HiveConf
+        at org.apache.sqoop.hive.HiveConfig.getHiveConf(HiveConfig.java:50)
+        at org.apache.sqoop.hive.HiveImport.getHiveArgs(HiveImport.java:392)
+        at org.apache.sqoop.hive.HiveImport.executeExternalHiveScript(HiveImport.java:379)
+        at org.apache.sqoop.hive.HiveImport.executeScript(HiveImport.java:337)
+        at org.apache.sqoop.hive.HiveImport.importTable(HiveImport.java:241)
+        at org.apache.sqoop.tool.ImportTool.importTable(ImportTool.java:514)
+        at org.apache.sqoop.tool.ImportTool.run(ImportTool.java:605)
+        at org.apache.sqoop.Sqoop.run(Sqoop.java:143)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.sqoop.Sqoop.runSqoop(Sqoop.java:179)
+        at org.apache.sqoop.Sqoop.runTool(Sqoop.java:218)
+        at org.apache.sqoop.Sqoop.runTool(Sqoop.java:227)
+        at org.apache.sqoop.Sqoop.main(Sqoop.java:236)
+Caused by: java.lang.ClassNotFoundException: org.apache.hadoop.hive.conf.HiveConf
+        at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+        at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:331)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+        at java.lang.Class.forName0(Native Method)
+        at java.lang.Class.forName(Class.java:264)
+        at org.apache.sqoop.hive.HiveConfig.getHiveConf(HiveConfig.java:44)
+        ... 12 more
+</code></pre><p>网上找的资料基本都在说配置个人环境变量，并没有卵用，到hive目录的lib下拷贝几个jar包，问题就解决了！</p><pre><code>[root@hadoop001 lib]$ cp hive-common-1.1.0-cdh5.7.0.jar /opt/software/sqoop/lib/
+[root@hadoop001 lib]$ cd hive-shims* /opt/software/sqoop/lib/
+</code></pre><p>查看hive中导入的数据</p><pre><code>hive&gt; show tables;
+OK
+stu_import
+Time taken: 0.067 seconds, Fetched: 1 row(s)
+hive&gt; select * from emp_import
+    &gt; ;
+OK
+1       zhangsan
+2       lisiw 
+3       wangwu
+</code></pre><p>导入Hive不建议大家使用–create-hive-table,建议事先创建好hive表</p><p>使用create创建表后，我们可以查看字段对应的类型，发现有些并不是我们想要的类型，所以我们要事先创建好表的结构再导入数据。</p><p>导入到hive指定分区</p><p>–hive-partition-key<partition-key> Sets the partition key<br> to use when importing<br> to hive<br>–hive-partition-value<partition-value> Sets the partition<br> value to use when<br> importing to hive</partition-value></partition-key></p><p>示例</p><pre><code>[root@hadoop001 lib]$ sqoop import \
+&gt; --connect jdbc:mysql://localhost:3306/sqoop \
+&gt; --username root --password 123456 \
+&gt; --table stu \
+&gt; --create-hive-table \
+&gt; --hive-database hive \
+&gt; --hive-import \
+&gt; --hive-overwrite \
+&gt; --hive-table stu_import1 \
+&gt; --mapreduce-job-name FromMySQL2HDFS \
+&gt; --delete-target-dir \
+&gt; --fields-terminated-by &#39;\t&#39; \
+&gt; -m 1 \
+&gt; --null-non-string 0 \
+&gt; --hive-partition-key dt \
+&gt; --hive-partition-value &quot;2018-08-08&quot;
+</code></pre><p>hive上查询</p><pre><code>hive&gt; select * from stu_import1;
+OK
+1       zhangsan        2018-08-08
+2       lisi    2018-08-08
+3       wangwu  2018-08-08
+Time taken: 0.121 seconds, Fetched: 3 row(s)
+</code></pre><h2 id="sqoop-job的使用"><a href="#sqoop-job的使用" class="headerlink" title="sqoop job的使用"></a>sqoop job的使用</h2><p>就是把sqoop执行的语句变成一个job，并不是在创建语句的时候执行，你可以查看该job，可以任何时候执行该job，也可以删除job，这样就方便我们进行任务的调度</p><p>–create<job-id> 创建一个新的job</job-id></p><p>–delete<job-id> 删除job</job-id></p><p>–exec<job-id> 执行job</job-id></p><p>–show<job-id> 显示job的参数</job-id></p><p>–list 列出所有的job</p><p>创建一个job</p><pre><code>sqoop job --create person_job1 -- import --connect jdbc:mysql://localhost:3306/sqoop \
+--username root \
+--password 123456 \
+--table sal_demo3 \
+-m 1 \
+--delete-target-dir 
+</code></pre><p>查看可用的job</p><pre><code>[root@hadoop001 lib]$ sqoop job --list
+Available jobs:
+  person_job1
+</code></pre><p>执行person_job完成导入</p><pre><code>[root@hadoop001 lib]$ sqoop job --exec person_job1
+
+[root@hadoop001 lib]$ hdfs dfs -ls
+Found 6 items
+drwxr-xr-x   - hadoop supergroup          0 2018-01-14 20:40 EMP_COLUMN_WHERE
+drwxr-xr-x   - hadoop supergroup          0 2018-01-14 20:49 STU_COLUMN_QUERY
+drwxr-xr-x   - hadoop supergroup          0 2018-01-14 20:45 STU_COLUMN_WHERE
+drwxr-xr-x   - hadoop supergroup          0 2018-01-14 21:10 STU_option_file
+drwxr-xr-x   - hadoop supergroup          0 2018-01-14 20:24 sal
+drwxr-xr-x   - hadoop supergroup          0 2018-01-15 03:08 sal_demo3
+</code></pre><p>问题：执行person_job的时候，需要输入数据库的密码，怎么样能不输入密码呢？</p><p>配置sqoop-site.xml</p><pre><code class="xml">&lt;property&gt;
+    &lt;name&gt;sqoop.metastore.client.record.password&lt;/name&gt;
+    &lt;value&gt;true&lt;/value&gt;
+    &lt;description&gt;If true, allow saved passwords in the metastore.
+    &lt;/description&gt;
+&lt;/property&gt; 
+</code></pre></div><div><div style="padding:10px 0;margin:20px auto;width:90%;text-align:center"><div>您的支持将鼓励我继续创作！</div> <button id="rewardButton" disable="enable" onclick='var qr=document.getElementById("QR");"none"===qr.style.display?qr.style.display="block":qr.style.display="none"'> <span>打赏</span></button><div id="QR" style="display:none"><div id="wechat" style="display:inline-block"> <img id="wechat_qr" src="/images/wechatpay.png" alt="CoderF 微信支付"><p>微信支付</p></div><div id="alipay" style="display:inline-block"> <img id="alipay_qr" src="/images/alipay.png" alt="CoderF 支付宝"><p>支付宝</p></div></div></div></div><div><div><div style="text-align:center;color:#ccc;font-size:14px">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div></div></div><footer class="post-footer"><div class="post-tags"><a href="/tags/Sqoop/" rel="tag"><i class="fa fa-tag"></i> Sqoop</a></div><div class="post-nav"><div class="post-nav-next post-nav-item"><a href="/2017/12/11/bigdata-notes-1.html" rel="next" title="大数据组件知识点第1节"><i class="fa fa-chevron-left"></i> 大数据组件知识点第1节</a></div><span class="post-nav-divider"></span><div class="post-nav-prev post-nav-item"> <a href="/2017/12/13/hadoop-2-hadoop-pseudo-distributed-hdfs.html" rel="prev" title="Hadoop：2、Hadoop伪分布式部署(HDFS)">Hadoop：2、Hadoop伪分布式部署(HDFS)<i class="fa fa-chevron-right"></i></a></div></div></footer></div></article><div class="post-spread"><div class="bdsharebuttonbox"><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a><a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a><a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a><a href="#" class="bds_more" data-cmd="more"></a><a class="bds_count" data-cmd="count"></a></div><script>window._bd_share_config={common:{bdText:"",bdMini:"2",bdMiniList:!1,bdPic:""},share:{bdSize:"16",bdStyle:"0"},image:{viewList:["tsina","douban","sqq","qzone","weixin","twi","fbook"],viewText:"分享到：",viewSize:"16"}}</script><script>with(document)(getElementsByTagName("head")[0]||body).appendChild(createElement("script")).src="/static/api/js/share.js?cdnversion="+~(-new Date/36e5)</script></div></div></div><div class="comments" id="comments"><div id="vcomments"></div></div></div><div class="sidebar-toggle"><div class="sidebar-toggle-line-wrap"><span class="sidebar-toggle-line sidebar-toggle-line-first"></span><span class="sidebar-toggle-line sidebar-toggle-line-middle"></span><span class="sidebar-toggle-line sidebar-toggle-line-last"></span></div></div><aside id="sidebar" class="sidebar"><div class="sidebar-inner"><ul class="sidebar-nav motion-element"><li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap"> 文章目录</li><li class="sidebar-nav-overview" data-target="site-overview-wrap"> 站点概览</li></ul><section class="site-overview-wrap sidebar-panel"><div class="site-overview"><div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person"> <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="CoderF"><p class="site-author-name" itemprop="name">CoderF</p><p class="site-description motion-element" itemprop="description"></p></div><nav class="site-state motion-element"><div class="site-state-item site-state-posts"> <a href="/archives/"><span class="site-state-item-count">69</span> <span class="site-state-item-name">日志</span></a></div><div class="site-state-item site-state-categories"> <a href="/categories/index.html"><span class="site-state-item-count">12</span> <span class="site-state-item-name">分类</span></a></div><div class="site-state-item site-state-tags"> <a href="/tags/index.html"><span class="site-state-item-count">12</span> <span class="site-state-item-name">标签</span></a></div></nav><div class="feed-link motion-element"><a href="/atom.xml" rel="alternate"><i class="fa fa-rss"></i> RSS</a></div><div class="links-of-author motion-element"><span class="links-of-author-item"><a href="https://www.jianshu.com/u/cf9e217dcf5c" target="_blank" title="简书"><i class="fa fa-fw fa-heartbeat"></i> 简书</a></span><span class="links-of-author-item"><a href="https://github.com/wangchangfei" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i> GitHub</a></span><span class="links-of-author-item"><a href="https://weibo.com/u/5870480318?is_all=1" target="_blank" title="微博"><i class="fa fa-fw fa-weibo"></i> 微博</a></span></div></div></section><section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active"><div class="post-toc"><div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#sqoop介绍"><span class="nav-number">1.</span> <span class="nav-text">sqoop介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看帮助命令sqoop-help"><span class="nav-number">2.</span> <span class="nav-text">查看帮助命令sqoop help</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#list-databases"><span class="nav-number">3.</span> <span class="nav-text">list-databases</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#list-tables"><span class="nav-number">4.</span> <span class="nav-text">list-tables</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将mysql导入HDFS中-import"><span class="nav-number">5.</span> <span class="nav-text">将mysql导入HDFS中(import)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在文件中执行"><span class="nav-number">6.</span> <span class="nav-text">在文件中执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#eval"><span class="nav-number">7.</span> <span class="nav-text">eval</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HDFS数据导出到MySQL（Hive中的数据导入到MySQL）"><span class="nav-number">8.</span> <span class="nav-text">HDFS数据导出到MySQL（Hive中的数据导入到MySQL）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL的中的数据导入到Hive中"><span class="nav-number">9.</span> <span class="nav-text">MySQL的中的数据导入到Hive中</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sqoop-job的使用"><span class="nav-number">10.</span> <span class="nav-text">sqoop job的使用</span></a></li></ol></div></div></section></div></aside></div></main><footer id="footer" class="footer"><div class="footer-inner"><div class="copyright">&copy; <span itemprop="copyrightYear">2018</span><span class="with-love"><i class="fa fa-user"></i></span> <span class="author" itemprop="copyrightHolder">CoderF</span> <span class="post-meta-divider">|</span><span class="post-meta-item-icon"><i class="fa fa-area-chart"></i></span> <span class="post-meta-item-text">Site words total count&#58;</span> <span title="Site words total count">91.1k</span></div><link rel="stylesheet" href="//cdn.bootcss.com/highlight.js/9.2.0/styles/solarized-light.min.css"><script src="//cdn.bootcss.com/highlight.js/9.2.0/highlight.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/scala.min.js"></script><script>hljs.initHighlightingOnLoad()</script></div></footer><div class="back-to-top"><i class="fa fa-arrow-up"></i></div></div><script type="text/javascript">"[object Function]"!==Object.prototype.toString.call(window.Promise)&&(window.Promise=null)</script><script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script><script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script><script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script><script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script><script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script><script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script><script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script><script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script><script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="//cdn.jsdelivr.net/npm/valine@1.1.4/dist/Valine.min.js"></script><script type="text/javascript">new Valine({av:AV,el:"#vcomments",verify:!1,notify:!1,app_id:"x8P6mpIr7TWIoaIwTFLtvUjw-gzGzoHsz",app_key:"PkMk480kBPrRXPvH5GF36VpI",placeholder:"说点什么吧！"})</script><script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script><script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script><script>AV.initialize("x8P6mpIr7TWIoaIwTFLtvUjw-gzGzoHsz","PkMk480kBPrRXPvH5GF36VpI")</script><script>function showTime(e){var t=new AV.Query(e),c=[],u=$(".leancloud_visitors");u.each(function(){c.push($(this).attr("id").trim())}),t.containedIn("url",c),t.find().done(function(e){var t=".leancloud-visitors-count";if(0!==e.length){for(var n=0;n<e.length;n++){var o=e[n],i=o.get("url"),s=o.get("time"),r=document.getElementById(i);$(r).find(t).text(s)}for(n=0;n<c.length;n++){i=c[n],r=document.getElementById(i);var l=$(r).find(t);""==l.text()&&l.text(0)}}else u.find(t).text(0)}).fail(function(e,t){console.log("Error: "+t.code+" "+t.message)})}function addCount(i){var e=$(".leancloud_visitors"),s=e.attr("id").trim(),r=e.attr("data-flag-title").trim(),t=new AV.Query(i);t.equalTo("url",s),t.find({success:function(e){if(0<e.length){var t=e[0];t.fetchWhenSave(!0),t.increment("time"),t.save(null,{success:function(e){$(document.getElementById(s)).find(".leancloud-visitors-count").text(e.get("time"))},error:function(e,t){console.log("Failed to save Visitor num, with error message: "+t.message)}})}else{var n=new i,o=new AV.ACL;o.setPublicReadAccess(!0),o.setPublicWriteAccess(!0),n.setACL(o),n.set("title",r),n.set("url",s),n.set("time",1),n.save(null,{success:function(e){$(document.getElementById(s)).find(".leancloud-visitors-count").text(e.get("time"))},error:function(e,t){console.log("Failed to create")}})}},error:function(e){console.log("Error:"+e.code+" "+e.message)}})}$(function(){var e=AV.Object.extend("Counter");1==$(".leancloud_visitors").length?addCount(e):1<$(".post-title-link").length&&showTime(e)})</script><script>!function(){var t=document.createElement("script"),e=window.location.protocol.split(":")[0];t.src="https"===e?"https://zz.bdstatic.com/linksubmit/push.js":"http://push.zhanzhang.baidu.com/push.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}()</script></body></html><script type="text/javascript" src="/js/src/love.js"></script>
